@@ -88,6 +88,81 @@ def render(blocker: dict[str, Any], style: str, value: Any = None) -> str:
     return rendered
 
 
+# Language that makes a requirement binding. A distractor containing any of
+# these is not a near-miss any more — it is a blocker, and labelling it APPLY
+# would invert the case. `blocks()` cannot catch this: the rule engine answers
+# "would a requirement of this kind disqualify the candidate", which is about
+# the profile, not about whether the sentence actually imposes a requirement.
+# For distractors the modality is the whole difference, so it is checked here.
+# Matched on word boundaries: a bare substring test would flag "only" inside
+# "commonly" and reject a perfectly good distractor.
+MANDATORY_LANGUAGE = (
+    "required",
+    "must",
+    "will not be considered",
+    "not eligible",
+    "restricted to",
+    "is a condition of",
+    "prior to their start date",
+    "non-negotiable",
+    "only",
+)
+
+
+def binding_language(sentence: str) -> list[str]:
+    """Mandatory-requirement phrases present in `sentence`, if any."""
+    lowered = sentence.lower()
+    return [p for p in MANDATORY_LANGUAGE if re.search(rf"\b{re.escape(p)}\b", lowered)]
+
+
+def render_distractor(blocker: dict[str, Any], index: int, value: Any = None) -> str:
+    """Render one of a blocker's near-miss distractors."""
+    try:
+        text = blocker["distractors"][index]
+    except IndexError as exc:
+        raise IndexError(
+            f"{blocker['id']} has {len(blocker['distractors'])} distractors, asked for {index}"
+        ) from exc
+
+    if "{" in text:
+        parameter = blocker["parameter"]
+        if value is None:
+            raise ValueError(f"{blocker['id']} distractor {index} needs a {parameter} value")
+        shown = f"{value:,}" if parameter == "band_max" else value
+        text = text.format(**{parameter: shown})
+
+    if "{" in text or "}" in text:
+        raise ValueError(f"unfilled placeholder in {blocker['id']} distractor: {text!r}")
+    return text
+
+
+def inject_distractor(
+    text: str,
+    blocker: dict[str, Any],
+    style: str,
+    index: int = 0,
+    value: Any = None,
+) -> tuple[str, tuple[int, int], str]:
+    """Inject a near-miss: same topic as a blocker, but not binding.
+
+    Flagging one of these is a false alarm, which is how the false-alarm rate
+    becomes measurable at all. The guard here refuses any distractor phrased as
+    a hard requirement, since that would make it a genuine blocker sitting in a
+    posting labelled APPLY.
+    """
+    sentence = render_distractor(blocker, index, value)
+
+    binding = binding_language(sentence)
+    if binding:
+        raise ValueError(
+            f"{blocker['id']} distractor {index} uses mandatory language {binding}; "
+            f"that makes it a real blocker, not a near-miss: {sentence!r}"
+        )
+
+    new_text, span = insert(text, sentence, style)
+    return new_text, span, sentence
+
+
 def inject_blocker(
     text: str,
     blocker: dict[str, Any],

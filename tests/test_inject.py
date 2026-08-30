@@ -9,7 +9,16 @@ from pathlib import Path
 
 import pytest
 
-from src.injector.inject import STYLES, _section_body, inject_blocker, insert, render
+from src.injector.inject import (
+    binding_language,
+    STYLES,
+    _section_body,
+    inject_blocker,
+    inject_distractor,
+    insert,
+    render,
+    render_distractor,
+)
 from src.rules import blocks, load_profile, load_taxonomy
 
 BASE_DIR = Path(__file__).resolve().parent.parent / "src/injector/bases"
@@ -115,3 +124,74 @@ def test_every_blocking_value_is_injectable():
                     text, blocker, style, PROFILE, value
                 )
                 assert new_text[start:end] == sentence
+
+
+# ─── distractors (step 2.3) ───────────────────────────────────────────────
+
+DISTRACTOR_CASES = [
+    (b, i, (b["blocking_values"][0] if b["kind"] == "parametric" else None))
+    for b in BLOCKERS
+    for i in range(len(b["distractors"]))
+]
+
+
+def _distractor_id(case):
+    return f"{case[0]['id']}#{case[1]}"
+
+
+@pytest.mark.parametrize("case", DISTRACTOR_CASES, ids=_distractor_id)
+@pytest.mark.parametrize("style", STYLES)
+def test_distractor_span_is_exact(case, style):
+    blocker, index, value = case
+    text = BASES[0].read_text()
+    new_text, (start, end), sentence = inject_distractor(text, blocker, style, index, value)
+    assert new_text[start:end] == sentence
+
+
+@pytest.mark.parametrize("case", DISTRACTOR_CASES, ids=_distractor_id)
+def test_no_distractor_uses_mandatory_language(case):
+    """The whole distinction is modality: 'preferred' is not 'required'.
+
+    A distractor phrased as binding would be a genuine blocker sitting in a
+    posting labelled APPLY — the same label inversion the blocker guard
+    prevents, arriving from the opposite direction.
+    """
+    blocker, index, value = case
+    sentence = render_distractor(blocker, index, value)
+    binding = binding_language(sentence)
+    assert not binding, f"{blocker['id']} distractor {index} is binding: {binding}"
+
+
+@pytest.mark.parametrize("case", DISTRACTOR_CASES, ids=_distractor_id)
+def test_distractor_has_no_unfilled_placeholder(case):
+    blocker, index, value = case
+    sentence = render_distractor(blocker, index, value)
+    assert "{" not in sentence and "}" not in sentence
+
+
+def test_every_blocker_has_at_least_one_distractor():
+    """Without one, that blocker's topic never appears in a clean posting and
+    the agent is never tested on distinguishing it."""
+    for blocker in BLOCKERS:
+        assert blocker["distractors"], f"{blocker['id']} has no distractor"
+
+
+def test_distractor_guard_rejects_binding_language():
+    """Prove the guard fires rather than being decorative."""
+    fake = {
+        "id": "fake",
+        "kind": "absolute",
+        "distractors": ["An active CISSP certification is required."],
+    }
+    with pytest.raises(ValueError, match="mandatory language"):
+        inject_distractor(BASES[0].read_text(), fake, "explicit", 0)
+
+
+def test_the_years_distractor_is_the_critical_trap():
+    """Names a figure the candidate does not meet, but only as a preference."""
+    yoe = next(b for b in BLOCKERS if b["id"] == "years_of_experience")
+    sentence = render_distractor(yoe, 0)
+    assert "8+" in sentence and "preferred" in sentence
+    assert PROFILE["years_experience"] < 8
+    # And it must survive the guard: it is a near-miss, not a requirement.
+    inject_distractor(BASES[0].read_text(), yoe, "explicit", 0)
