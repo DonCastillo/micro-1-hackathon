@@ -11,7 +11,7 @@ Time estimates in parentheses. Total ≈ 18h.
 
 - [X] **0.1 — Initialize the repo.** The directory is not currently under version control. `git init`, and make the first commit before writing anything else — Reproducibility (15 pts) needs history, and the README must distinguish what pre-existed from what was built during the competition. This repo starts empty, so that claim is clean.
 - [X] **0.2 — Python environment.** `.venv`, pinned. Dependencies: `anthropic`, `pyyaml`, `pytest`. Write `requirements.txt` with exact versions immediately — the repro guide needs them and reconstructing versions later is guesswork.
-- [ ] **0.3 — API key in `.env`, `.env` in `.gitignore`.** Ground rule #8: no credentials in the submission. Do this before the first API call, not after.
+- [x] **0.3 — API key in `.env`, `.env` in `.gitignore`.** Ground rule #8: no credentials in the submission. Do this before the first API call, not after.
 - [ ] **0.4 — Directory skeleton** per `plan.md` §8. Empty `__init__.py` files, `.gitkeep` in `runs/` and `results/`.
 
 **Done when:** `git log` shows one commit, `pip install -r requirements.txt` works from scratch, and no secret is tracked.
