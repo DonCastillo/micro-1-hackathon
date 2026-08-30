@@ -94,25 +94,26 @@ def render(blocker: dict[str, Any], style: str, value: Any = None) -> str:
 # "would a requirement of this kind disqualify the candidate", which is about
 # the profile, not about whether the sentence actually imposes a requirement.
 # For distractors the modality is the whole difference, so it is checked here.
-# Matched on word boundaries: a bare substring test would flag "only" inside
-# "commonly" and reject a perfectly good distractor.
+# Regex patterns, not literals, for two reasons found by testing: a bare
+# substring test flags "only" inside "commonly", and a literal "required"
+# misses "requires" — which let a binding sentence pass the guard.
 MANDATORY_LANGUAGE = (
-    "required",
-    "must",
-    "will not be considered",
-    "not eligible",
-    "restricted to",
-    "is a condition of",
-    "prior to their start date",
-    "non-negotiable",
-    "only",
+    r"require[sd]",
+    r"\bmust\b",
+    r"will not be considered",
+    r"not eligible",
+    r"restricted to",
+    r"is a condition of",
+    r"prior to their start date",
+    r"non-negotiable",
+    r"\bonly\b",
 )
 
 
 def binding_language(sentence: str) -> list[str]:
     """Mandatory-requirement phrases present in `sentence`, if any."""
     lowered = sentence.lower()
-    return [p for p in MANDATORY_LANGUAGE if re.search(rf"\b{re.escape(p)}\b", lowered)]
+    return [p for p in MANDATORY_LANGUAGE if re.search(p, lowered)]
 
 
 def render_distractor(blocker: dict[str, Any], index: int, value: Any = None) -> str:
