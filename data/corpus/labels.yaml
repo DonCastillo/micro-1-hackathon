@@ -16,7 +16,6 @@ postings:
   distractors:
   - type: degree_required
     phrasing: indirect
-    value: Ph.D.
     evidence_span:
     - 241
     - 296
@@ -51,19 +50,19 @@ postings:
   base: base_04_data_engineer_health
   expected_verdict: SKIP
   blockers:
-  - type: citizenship_required
-    phrasing: footer
+  - type: employment_type
+    phrasing: explicit
+    value: W2 contract
     evidence_span:
-    - 1318
-    - 1407
-    sentence: Due to the nature of our government contracts, employment is restricted to U.S. citizens.
-  - type: degree_required
+    - 770
+    - 865
+    sentence: This is a W2 contract position; corp-to-corp and third-party candidates will not be considered.
+  - type: citizenship_required
     phrasing: indirect
-    value: Master's
     evidence_span:
     - 241
-    - 331
-    sentence: Candidates without a Master's in a technical discipline will not be advanced to interview.
+    - 317
+    sentence: Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15).
   distractors: []
 - id: jd_05
   bucket: clean
@@ -79,7 +78,6 @@ postings:
     sentence: Experience in safety-critical or regulated software environments is valued.
   - type: timezone_overlap
     phrasing: explicit
-    value: Central European Time
     evidence_span:
     - 775
     - 865
@@ -91,11 +89,11 @@ postings:
   blockers:
   - type: relocation_required
     phrasing: title_body_conflict
-    value: Atlanta, GA
+    value: Seattle, WA
     evidence_span:
     - 194
     - 270
-    sentence: You will need to be based in Atlanta, GA within 90 days of joining the team.
+    sentence: You will need to be based in Seattle, WA within 90 days of joining the team.
   distractors: []
 - id: jd_07
   bucket: injected
@@ -117,16 +115,15 @@ postings:
   distractors:
   - type: travel_percentage
     phrasing: footer
-    value: 50
     evidence_span:
-    - 1303
-    - 1377
+    - 1302
+    - 1376
     sentence: Occasional travel to team offsites, typically two or three times per year.
   - type: shift_oncall
-    phrasing: explicit
+    phrasing: indirect
     evidence_span:
-    - 697
-    - 791
+    - 239
+    - 333
     sentence: We run a business-hours on-call rotation shared across the team, roughly one week per quarter.
 - id: jd_09
   bucket: injected
@@ -147,18 +144,12 @@ postings:
   expected_verdict: APPLY
   blockers: []
   distractors:
-  - type: citizenship_required
+  - type: security_clearance
     phrasing: explicit
     evidence_span:
     - 712
-    - 791
-    sentence: Our team spans several countries and we welcome applicants from any background.
-  - type: work_authorization
-    phrasing: footer
-    evidence_span:
-    - 1317
-    - 1407
-    sentence: We are a globally distributed team and can discuss sponsorship for exceptional candidates.
+    - 784
+    sentence: Familiarity with FedRAMP or government compliance frameworks is welcome.
 - id: jd_11
   bucket: contradiction
   base: base_06_ml_engineer
@@ -166,11 +157,11 @@ postings:
   blockers:
   - type: onsite_location
     phrasing: title_body_conflict
-    value: Seattle, WA
+    value: Austin, TX
     evidence_span:
     - 198
-    - 273
-    sentence: Candidates must reside within commuting distance of our Seattle, WA office.
+    - 272
+    sentence: Candidates must reside within commuting distance of our Austin, TX office.
   distractors: []
 - id: jd_12
   bucket: injected
@@ -179,11 +170,11 @@ postings:
   blockers:
   - type: relocation_required
     phrasing: footer
-    value: Atlanta, GA
+    value: Seattle, WA
     evidence_span:
     - 1172
     - 1245
-    sentence: Relocation to Atlanta, GA is a condition of employment for this position.
+    sentence: Relocation to Seattle, WA is a condition of employment for this position.
   distractors: []
 - id: jd_13
   bucket: clean
@@ -191,18 +182,12 @@ postings:
   expected_verdict: APPLY
   blockers: []
   distractors:
-  - type: shift_oncall
-    phrasing: indirect
-    evidence_span:
-    - 241
-    - 335
-    sentence: We run a business-hours on-call rotation shared across the team, roughly one week per quarter.
-  - type: citizenship_required
+  - type: timezone_overlap
     phrasing: footer
     evidence_span:
-    - 1365
-    - 1444
-    sentence: Our team spans several countries and we welcome applicants from any background.
+    - 1269
+    - 1359
+    sentence: Our team is distributed across time zones and we operate asynchronously wherever possible.
 - id: jd_14
   bucket: injected
   base: base_05_mobile_ios
@@ -210,11 +195,11 @@ postings:
   blockers:
   - type: onsite_location
     phrasing: footer
-    value: New York, NY
+    value: Boston, MA
     evidence_span:
     - 1080
-    - 1160
-    sentence: 'Note: this role is not remote-eligible and is tied to our New York, NY location.'
+    - 1158
+    sentence: 'Note: this role is not remote-eligible and is tied to our Boston, MA location.'
   distractors: []
 - id: jd_15
   bucket: injected
@@ -234,20 +219,18 @@ postings:
   base: base_03_platform_infrastructure
   expected_verdict: SKIP
   blockers:
-  - type: years_of_experience
+  - type: citizenship_required
+    phrasing: indirect
+    evidence_span:
+    - 212
+    - 288
+    sentence: Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15).
+  - type: professional_licensure
     phrasing: footer
-    value: 15
     evidence_span:
-    - 1287
-    - 1360
-    sentence: Candidates with fewer than 15 years of experience will not be considered.
-  - type: certification_required
-    phrasing: explicit
-    value: Certified Kubernetes Administrator
-    evidence_span:
-    - 689
-    - 778
-    sentence: An active Certified Kubernetes Administrator certification is required for this position.
+    - 1273
+    - 1354
+    sentence: Licensure will be verified with the state board prior to an offer being extended.
   distractors: []
 - id: jd_17
   bucket: clean
@@ -255,19 +238,18 @@ postings:
   expected_verdict: APPLY
   blockers: []
   distractors:
-  - type: work_authorization
-    phrasing: explicit
+  - type: security_clearance
+    phrasing: footer
     evidence_span:
-    - 960
-    - 1029
-    sentence: Visa sponsorship may be available depending on the role and location.
-  - type: timezone_overlap
-    phrasing: indirect
-    value: Central European Time
+    - 1419
+    - 1472
+    sentence: Experience working in cleared environments is a plus.
+  - type: certification_required
+    phrasing: footer
     evidence_span:
-    - 320
-    - 410
-    sentence: Our team is distributed across time zones and we operate asynchronously wherever possible.
+    - 1474
+    - 1530
+    sentence: We will sponsor certification for engineers who want it.
 - id: jd_18
   bucket: contradiction
   base: base_02_frontend_design_systems
@@ -299,20 +281,18 @@ postings:
   expected_verdict: APPLY
   blockers: []
   distractors:
-  - type: certification_required
-    phrasing: footer
-    value: AWS Certified Solutions Architect - Professional
+  - type: citizenship_required
+    phrasing: explicit
     evidence_span:
-    - 1195
-    - 1251
-    sentence: We will sponsor certification for engineers who want it.
-  - type: travel_percentage
-    phrasing: footer
-    value: 50
+    - 689
+    - 768
+    sentence: Our team spans several countries and we welcome applicants from any background.
+  - type: employment_type
+    phrasing: explicit
     evidence_span:
-    - 1253
-    - 1327
-    sentence: Occasional travel to team offsites, typically two or three times per year.
+    - 771
+    - 833
+    sentence: This role is open to both full-time employees and contractors.
 - id: jd_21
   bucket: injected
   base: base_02_frontend_design_systems
@@ -332,13 +312,18 @@ postings:
   expected_verdict: APPLY
   blockers: []
   distractors:
-  - type: compensation_floor
-    phrasing: explicit
-    value: 120000
+  - type: security_clearance
+    phrasing: footer
     evidence_span:
-    - 697
-    - 773
-    sentence: The base range for this role is $160,000 - $195,000 depending on experience.
+    - 1206
+    - 1259
+    sentence: Experience working in cleared environments is a plus.
+  - type: work_authorization
+    phrasing: footer
+    evidence_span:
+    - 1261
+    - 1351
+    sentence: We are a globally distributed team and can discuss sponsorship for exceptional candidates.
 - id: jd_23
   bucket: contradiction
   base: base_08_developer_experience

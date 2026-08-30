@@ -210,7 +210,13 @@ def build_corpus(seed: int) -> list[Posting]:
                 blocker = blockers[blocker_id]
                 index = rng.randrange(len(blocker["distractors"]))
                 style = rng.choice(STYLES)
-                value = _value_for(blocker, rng)
+                # Only sample a value when the distractor template consumes
+                # one. Most distractors are fixed strings, and recording an
+                # unused value made the answer key actively misleading — a
+                # compensation distractor reading "$160,000 - $195,000" was
+                # labelled `value: 120000`, which reads like a broken label.
+                needs_value = "{" in blocker["distractors"][index]
+                value = _value_for(blocker, rng) if needs_value else None
                 posting.text, _, sentence = inject_distractor(
                     posting.text, blocker, style, index, value
                 )

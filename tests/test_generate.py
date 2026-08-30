@@ -169,3 +169,22 @@ def test_committed_corpus_is_current():
         assert (corpus_dir / f"{posting.id}.md").read_text() == posting.text, (
             f"{posting.id} on disk differs from seed 42; regenerate the corpus"
         )
+
+
+@pytest.mark.parametrize("posting", CORPUS, ids=_ids)
+def test_a_recorded_value_was_actually_used(posting):
+    """No value in the answer key unless the sentence consumed it.
+
+    Distractor templates are mostly fixed strings. Sampling a blocking value
+    for them anyway produced labels like `value: 120000` beside a sentence
+    reading "$160,000 - $195,000" — not wrong in the verdict, but misleading
+    to anyone auditing the corpus, which is the whole point of the key.
+    """
+    for mark in posting.blockers + posting.distractors:
+        if mark.value is None:
+            continue
+        shown = f"{mark.value:,}" if isinstance(mark.value, int) else str(mark.value)
+        assert shown in mark.sentence, (
+            f"{posting.id}: {mark.type} records value {mark.value!r} "
+            f"but it does not appear in {mark.sentence!r}"
+        )
