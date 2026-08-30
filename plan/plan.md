@@ -241,11 +241,38 @@ results/                  # per-iteration metric tables
 
 ---
 
-## 13. Open decisions
+## 13. Decisions
 
-- Model: default to `claude-sonnet-5` for eval volume, temperature 0, pinned. Spot-check the final configuration on `claude-opus-5`.
+**Model — decided.** `claude-sonnet-5`, temperature 0, pinned in `.env.example`. Budget is
+$20 of API credit; Opus 5 across the full project estimates ~$39 and does not fit, while
+Sonnet 5 with caching estimates ~$11.
+
+The baseline and **every** iteration run on this same model. The final configuration also gets
+a single spot-check run on `claude-opus-5` (~$3) — reported as a clearly labeled separate
+experiment, never folded into the baseline-vs-final comparison, which would invalidate it.
+
+**Prompt caching — planned as its own iteration.** The taxonomy, candidate profile, and system
+instructions form a byte-identical prefix across all 24 postings; the posting itself is the only
+volatile part. Caching that prefix roughly halves input cost. It earns a changelog entry on its
+own merits because **cost per task is a required eval metric** (§6), and it must not change
+detection behaviour — if the metrics move at all, that's a bug in the prefix, not a win.
+
+Order matters: put the stable prefix first (taxonomy → profile → instructions), the posting last.
+Verify with `usage.cache_read_input_tokens` — if it reads zero across postings, something
+volatile has leaked into the prefix.
+
+### Still open
+
 - Whether the candidate profile becomes a tool the agent queries, or stays in context — worth testing as its own iteration if time allows.
 - How many real postings to demo live in the video (3–5 feels right).
+
+### Budget guardrails
+
+- Debug against a 3-posting smoke subset, never the full 24 — full sweeps are for recording results.
+- Corpus generation is deterministic and costs nothing; regenerate freely.
+- Log cost per run from `response.usage` so burn is visible in real time, not discovered at the end.
+- The reviewer/challenger debate experiment (§7) is the most expensive by call count. If credit
+  is tight when it comes up, run it on a subset and say so in the changelog.
 
 ---
 
