@@ -144,9 +144,26 @@ Recall alone is gameable: an agent that flags everything scores 100% and is wort
 
 Stated up front so it can't drift: **catches every hard blocker in the corpus, flags no more than one clean posting, and cites a correct evidence span for every blocker it reports.** Anything less means the applicant either still wastes time or stops trusting the tool.
 
-### Determinism
+### Reproducibility and run-to-run variance
 
-Temperature 0, pinned model ID, fixed corpus seed, versions and runtime recorded per run.
+**Outputs are not bit-reproducible, and the plan must not pretend otherwise.** Sampling
+parameters were removed on this model generation — there is no temperature setting on
+Sonnet 5, and sending one returns a 400.
+
+What *is* pinned: model ID, effort level, corpus seed, the prompts, and the package versions
+and runtime recorded per run. What is not pinned is the model's own sampling.
+
+The consequence lands on the metrics. A single run's F1 carries noise, so a small gain between
+two iterations can be indistinguishable from it. Therefore:
+
+- Run the eval **3 times for the baseline and 3 times for the final**, and report the spread
+  (min/max or ±) alongside the headline number.
+- Mid-iteration runs can stay single-pass to save budget.
+- **Never claim an improvement smaller than the observed baseline spread.** If iteration 2 gains
+  3 points and the baseline varies by 5 across runs, that gain is not evidence of anything.
+
+This costs a few extra dollars and is worth it: "recall went 41% → 89% (±2)" survives scrutiny,
+while a bare single-run number invites exactly the question you won't be able to answer.
 
 ---
 
