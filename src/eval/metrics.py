@@ -248,3 +248,22 @@ def comparison_markdown(
             f"${final.cost_per_task - baseline.cost_per_task:.4f} |"
         )
     return "\n".join(lines)
+
+
+def metrics_to_dict(m: Metrics) -> dict[str, Any]:
+    """JSON-safe form, so a run's numbers can be compared later without rerunning."""
+    from dataclasses import asdict
+
+    out = asdict(m)
+    out["cost_per_task"] = m.cost_per_task
+    for key in ("recall_by_type", "recall_by_style", "recall_by_bucket"):
+        out[key] = {k: list(v) for k, v in getattr(m, key).items()}
+    return out
+
+
+def metrics_from_dict(data: dict[str, Any]) -> Metrics:
+    fields = {f for f in Metrics.__dataclass_fields__}
+    m = Metrics(**{k: v for k, v in data.items() if k in fields})
+    for key in ("recall_by_type", "recall_by_style", "recall_by_bucket"):
+        setattr(m, key, {k: tuple(v) for k, v in getattr(m, key).items()})
+    return m

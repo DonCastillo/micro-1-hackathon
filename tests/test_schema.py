@@ -13,6 +13,7 @@ import pytest
 
 from src.schema import (
     PREDICTION_JSON_SCHEMA,
+    UNREADABLE,
     VERDICTS,
     Claim,
     ParseError,
@@ -121,10 +122,15 @@ def test_caveat_scores_as_apply(verdict, scored):
     assert Prediction(verdict=verdict).scored_verdict == scored
 
 
-def test_unparseable_output_is_scored_as_finding_nothing():
-    """Not as SKIP — that would hand it the 16 blocked postings for free."""
+def test_unparseable_output_matches_no_gold_verdict():
+    """Neither SKIP nor APPLY: both hand out free credit.
+
+    SKIP would be right on the 16 blocked postings, APPLY on the 8 clean ones.
+    A system that emitted nothing legible decided nothing.
+    """
     p = Prediction.unparseable("no JSON found")
-    assert p.scored_verdict == "APPLY"
+    assert p.scored_verdict == UNREADABLE
+    assert p.scored_verdict not in ("APPLY", "SKIP")
     assert p.blockers == []
     assert p.parse_error
 

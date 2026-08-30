@@ -26,6 +26,9 @@ from typing import Any
 
 VERDICTS = ("APPLY", "APPLY_WITH_CAVEAT", "SKIP")
 
+# Never a gold verdict, so it can never be scored correct. See scored_verdict.
+UNREADABLE = "UNREADABLE"
+
 # Spellings models reach for that mean one of the three above. Normalizing
 # these is parse-layer work, not prompt tuning.
 _VERDICT_ALIASES = {
@@ -70,7 +73,15 @@ class Prediction:
         Gold verdicts are only ever APPLY or SKIP, so a three-way comparison
         would need someone to rule on when a caveat is deserved — the kind of
         judgment call the protocol exists to remove.
+
+        An unreadable answer returns UNREADABLE, which matches no gold verdict.
+        Any concrete fallback would hand out free credit: APPLY is right on the
+        8 clean postings, SKIP on the 16 blocked ones. A system that emitted
+        nothing legible did not decide anything, and scoring it as though it
+        had is the one reading that cannot be defended.
         """
+        if self.parse_error:
+            return UNREADABLE
         return "SKIP" if self.verdict == "SKIP" else "APPLY"
 
     def unknown_types(self, known: set[str]) -> list[str]:
@@ -91,9 +102,8 @@ class Prediction:
     def unparseable(cls, error: str) -> Prediction:
         """A system whose output could not be read found nothing.
 
-        Scoring this as SKIP would hand it credit for the 16 blocked postings
-        without reading them; scoring it as APPLY with no blockers is the
-        honest reading — it made no findable claim.
+        The stored verdict is APPLY so `to_dict` stays inside the declared
+        enum, but `scored_verdict` reports UNREADABLE, which matches nothing.
         """
         return cls(verdict="APPLY", parse_error=error)
 

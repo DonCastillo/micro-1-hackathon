@@ -1,0 +1,126 @@
+{
+  "system": "sanity_silent",
+  "note": "Never flags anything. Recall 0, but precision 1.0 - it never claimed anything wrongly.",
+  "predictions": {
+    "jd_01": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_02": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_03": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_04": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_05": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_06": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_07": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_08": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_09": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_10": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_11": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_12": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_13": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_14": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_15": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_16": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_17": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_18": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_19": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_20": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_21": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_22": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_23": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_24": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    }
+  }
+}

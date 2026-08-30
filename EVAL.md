@@ -224,6 +224,11 @@ acceptance bar for this document is that a stranger scores a run identically:
   printing `0.0` would read as "cites badly" rather than "never cited".
 - **Hallucination, missing-evidence** — reported as `n/a` when no blockers were claimed
   at all, for the same reason.
+- **An unreadable answer matches no verdict.** A prediction that could not be parsed is
+  scored as `UNREADABLE`, which equals neither gold verdict. Any concrete fallback hands
+  out free credit — `SKIP` is right on the 16 blocked postings, `APPLY` on the 8 clean
+  ones — and a system that emitted nothing legible decided nothing. Its blockers still
+  count as missed.
 - **A run with zero scored postings is refused, not scored.** Section 4's conventions
   compose to precision 1.0 and recall 1.0 on an empty corpus, giving F1 = 1.0 — so a run
   that crashed before scoring anything would report a *perfect* result. `aggregate()`

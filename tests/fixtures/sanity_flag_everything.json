@@ -1,0 +1,1494 @@
+{
+  "system": "sanity_flag_everything",
+  "note": "Claims every blocker type on every posting. Perfect recall, useless tool - the case F1 exists to punish.",
+  "predictions": {
+    "jd_01": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_02": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_03": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_04": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_05": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_06": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_07": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_08": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_09": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_10": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_11": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_12": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_13": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_14": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_15": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_16": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_17": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_18": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_19": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_20": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_21": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_22": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_23": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_24": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "certification_required",
+          "evidence": ""
+        },
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        },
+        {
+          "type": "degree_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        },
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        },
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        },
+        {
+          "type": "timezone_overlap",
+          "evidence": ""
+        },
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        },
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        },
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    }
+  }
+}
