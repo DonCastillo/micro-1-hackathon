@@ -179,9 +179,11 @@ Held identical between the baseline and every agent variant:
 - The 24 postings, in the same order
 - Scoring code — one `src/eval/` harness scores everything
 
-The baseline gets no taxonomy, no tools, no structured schema, and no evidence
-requirement; that is what makes it a baseline. Its reasoning is never tuned to make its
-output easier to parse — only the parse layer adapts, never the prompt.
+The baseline receives the posting, the profile, and the bare list of 14 blocker ids —
+names only. It does **not** receive their descriptions, phrasings, blocking rules,
+per-category decomposition, a verification pass, a structured output schema, or any
+requirement to cite evidence. That is what makes it a baseline. Its reasoning is never
+tuned to make its output easier to parse — only the parse layer adapts, never the prompt.
 
 The `claude-opus-5` spot-check is a **separate, labelled experiment** on the final
 configuration only. It never appears in the baseline-vs-final comparison, because a
@@ -212,6 +214,24 @@ different numbers.
 
 **Effect on recorded numbers:** none. The amendment predates the first baseline run;
 no measurement existed when it was made.
+
+### 2026-08-30 — the baseline is given the blocker id list
+
+**Was:** section 9 said the baseline gets "no taxonomy".
+
+**Now:** it gets the 14 blocker ids as bare names, and nothing else about them.
+
+**Why:** detection is matched on those ids (section 3). A baseline that has never seen
+them cannot emit one, so its recall was **0 before the first API call** — a guaranteed
+result rather than a measurement. Every gain over it would have been an artefact of
+vocabulary, not of engineering, and the comparison would not survive a judge asking how
+the baseline was supposed to name a blocker it had no word for.
+
+This makes the baseline stronger and the reported improvement smaller. The remaining
+differences — decomposition, verification, evidence, structured output — are the ones
+the iterations are actually testing.
+
+**Effect on recorded numbers:** none; predates the first run.
 
 ### 2026-08-30 — conventions for undefined rates
 

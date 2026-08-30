@@ -1,0 +1,185 @@
+"""The baseline: one direct prompt, one pass, no help.
+
+    python -m src.baseline.run --dry-run          # print the prompt, spend nothing
+    python -m src.baseline.run --out runs/baseline
+
+This is what a person would actually type into a chat window, and it is
+deliberately not improved. EVAL.md 9 allows the *parse layer* to adapt to
+whatever comes back but forbids touching the prompt to make output easier to
+read — tuning the baseline's reasoning would inflate the number every later
+iteration is measured against.
+
+What it gets: the posting, the profile, and the 14 blocker ids as bare names
+(EVAL.md amendment 2026-08-30 — without them it cannot name a blocker the
+scorer recognises, and its recall would be zero before the first call).
+
+What it does not get: what those ids mean, how they relate to the profile,
+per-category decomposition, a verification pass, a structured output schema,
+or any instruction to quote evidence. Those are the iterations.
+"""
+
+from __future__ import annotations
+
+import argparse
+import json
+import re
+from pathlib import Path
+from typing import Any
+
+import yaml
+
+from src import llm
+from src.rules import load_profile, load_taxonomy
+from src.schema import Claim, ParseError, Prediction
+
+ROOT = Path(__file__).resolve().parent.parent.parent
+CORPUS = ROOT / "data/corpus"
+
+SYSTEM = "You are helping someone decide which jobs are worth applying to."
+
+PROMPT = """\
+Here is my background:
+
+{profile}
+
+Here is a job posting:
+
+{posting}
+
+Should I apply? If anything in this posting disqualifies me, tell me what.
+
+If you find anything disqualifying, name it using one of these labels:
+{labels}
+"""
+
+# Read off the model's prose. Ordered most specific first: "do not apply"
+# must win before the bare word "apply" is considered.
+_SKIP_PATTERNS = (
+    r"\bdo not apply\b",
+    r"\bdon'?t apply\b",
+    r"\bshould not apply\b",
+    r"\bnot worth applying\b",
+    r"\bwould not apply\b",
+    r"\bskip\b",
+    r"\bnot eligible\b",
+    r"\bdisqualif",
+)
+_APPLY_PATTERNS = (
+    r"\byou (?:should|can) apply\b",
+    r"\bworth applying\b",
+    r"\bgo ahead and apply\b",
+    r"\bnothing (?:here )?disqualif",
+    r"\bno (?:hard )?blockers?\b",
+    r"\byes,? apply\b",
+    r"\bapply\b",
+)
+
+
+def build_prompt(posting: str, profile: dict[str, Any], labels: list[str]) -> str:
+    return PROMPT.format(
+        profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+        posting=posting.strip(),
+        labels="\n".join(f"- {label}" for label in labels),
+    )
+
+
+def parse_baseline_output(text: str, known_types: list[str]) -> Prediction:
+    """Map freeform prose onto the shared schema.
+
+    Extraction only. It finds the verdict the model stated and the labels the
+    model named; it never infers a blocker the model did not mention, which
+    would be the parse layer doing the baseline's work for it.
+    """
+    lowered = text.lower()
+
+    # Earliest signal wins, rather than SKIP taking precedence outright.
+    # "Yes, apply - nothing here disqualifies you" contains a skip pattern
+    # ("disqualif") under a negation, and a skip-first rule read it backwards.
+    skip_at = min(
+        (m.start() for p in _SKIP_PATTERNS if (m := re.search(p, lowered))), default=None
+    )
+    apply_at = min(
+        (m.start() for p in _APPLY_PATTERNS if (m := re.search(p, lowered))), default=None
+    )
+
+    if skip_at is None and apply_at is None:
+        raise ParseError("no verdict found in baseline output")
+    if apply_at is None:
+        verdict = "SKIP"
+    elif skip_at is None:
+        verdict = "APPLY"
+    else:
+        verdict = "SKIP" if skip_at <= apply_at else "APPLY"
+
+    # A label counts as claimed only if the model wrote it. Underscores may
+    # appear as spaces or hyphens because models reformat ids into prose.
+    # (re.escape leaves underscores alone, so substitute on the raw id.)
+    named = []
+    for blocker_id in known_types:
+        pattern = re.escape(blocker_id).replace("_", r"[\s_-]")
+        if re.search(rf"\b{pattern}\b", lowered):
+            named.append(Claim(blocker_id, ""))
+
+    return Prediction(verdict=verdict, blockers=named)
+
+
+def load_corpus(corpus: Path) -> list[tuple[str, str]]:
+    labels = yaml.safe_load((corpus / "labels.yaml").read_text())["postings"]
+    return [(r["id"], (corpus / f"{r['id']}.md").read_text()) for r in labels]
+
+
+def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--corpus", type=Path, default=CORPUS)
+    parser.add_argument("--out", type=Path, help="directory for predictions.json")
+    parser.add_argument("--dry-run", action="store_true", help="print one prompt, call nothing")
+    parser.add_argument("--limit", type=int, help="only the first N postings (smoke runs)")
+    args = parser.parse_args()
+
+    profile = load_profile()
+    blocker_ids = sorted(b["id"] for b in load_taxonomy()["blockers"])
+    postings = load_corpus(args.corpus)
+    if args.limit:
+        postings = postings[: args.limit]
+
+    if args.dry_run:
+        posting_id, text = postings[0]
+        print(f"=== system ===\n{SYSTEM}\n")
+        print(f"=== user ({posting_id}) ===")
+        print(build_prompt(text, profile, blocker_ids))
+        print(f"=== model: {llm.model_id()}  effort: {llm.effort()} ===")
+        return
+
+    predictions: dict[str, Any] = {}
+    total = llm.Usage()
+
+    for posting_id, text in postings:
+        response = llm.call(SYSTEM, build_prompt(text, profile, blocker_ids))
+        total.add(response.usage)
+        try:
+            prediction = parse_baseline_output(response.text, blocker_ids)
+        except ParseError as exc:
+            prediction = Prediction.unparseable(str(exc))
+        predictions[posting_id] = prediction.to_dict()
+        flag = "!" if prediction.parse_error else " "
+        print(f"{flag} {posting_id}  {prediction.verdict:6} "
+              f"{len(prediction.blockers)} blockers  ${total.cost_usd:.4f}")
+
+    payload = {
+        "system": "baseline",
+        "model": llm.model_id(),
+        "effort": llm.effort(),
+        "usage": total.to_dict(),
+        "predictions": predictions,
+    }
+
+    if args.out:
+        args.out.mkdir(parents=True, exist_ok=True)
+        (args.out / "predictions.json").write_text(json.dumps(payload, indent=2) + "\n")
+        print(f"\nwrote {args.out}/predictions.json  total ${total.cost_usd:.4f}")
+    else:
+        print(json.dumps(payload, indent=2))
+
+
+if __name__ == "__main__":
+    main()
