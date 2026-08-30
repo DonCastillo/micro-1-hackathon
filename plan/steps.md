@@ -12,7 +12,7 @@ Time estimates in parentheses. Total ≈ 18h.
 - [X] **0.1 — Initialize the repo.** The directory is not currently under version control. `git init`, and make the first commit before writing anything else — Reproducibility (15 pts) needs history, and the README must distinguish what pre-existed from what was built during the competition. This repo starts empty, so that claim is clean.
 - [X] **0.2 — Python environment.** `.venv`, pinned. Dependencies: `anthropic`, `pyyaml`, `pytest`. Write `requirements.txt` with exact versions immediately — the repro guide needs them and reconstructing versions later is guesswork.
 - [x] **0.3 — API key in `.env`, `.env` in `.gitignore`.** Ground rule #8: no credentials in the submission. Do this before the first API call, not after.
-- [ ] **0.4 — Directory skeleton** per `plan.md` §8. Empty `__init__.py` files, `.gitkeep` in `runs/` and `results/`.
+- [x] **0.4 — Directory skeleton** per `plan.md` §8. Empty `__init__.py` files, `.gitkeep` in `runs/` and `results/`.
 
 **Done when:** `git log` shows one commit, `pip install -r requirements.txt` works from scratch, and no secret is tracked.
 
@@ -22,7 +22,7 @@ Time estimates in parentheses. Total ≈ 18h.
 
 Nothing here calls a model. This phase exists so the evaluation can't drift to flatter the results.
 
-- [ ] **1.1 — `data/taxonomy.yaml`.** All 14 blocker types from `plan.md` §3. Per type:
+- [x] **1.1 — `data/taxonomy.yaml`.** All 14 blocker types from `plan.md` §3. Per type:
 
 ```yaml
 - id: work_authorization
@@ -38,7 +38,7 @@ Nothing here calls a model. This phase exists so the evaluation can't drift to f
 
   The `distractor` field matters as much as the phrasings — it generates the near-miss cases that make the false-alarm metric real.
 
-- [ ] **1.2 — `data/profile/candidate.yaml`.** Synthetic but realistic: `work_auth`, `citizenship`, `location`, `willing_to_relocate`, `timezone`, `years_experience`, `degree`, `certifications`, `clearance`, `comp_floor`, `employment_types`, `max_travel_pct`.
+- [x] **1.2 — `data/profile/candidate.yaml`.** Synthetic but realistic: `work_auth`, `citizenship`, `location`, `willing_to_relocate`, `timezone`, `years_experience`, `degree`, `certifications`, `clearance`, `comp_floor`, `employment_types`, `max_travel_pct`.
 
 - [ ] **1.3 — `EVAL.md`.** Freeze the metrics before any agent exists: primary F1 (recall + false-alarm rate), decision accuracy, evidence accuracy, evidence-hallucination rate, human time, cost. State the target explicitly: *every hard blocker caught, ≤1 clean posting flagged, correct evidence span on every reported blocker.*
 
@@ -74,12 +74,13 @@ Built **before** the baseline, so both systems are scored by identical code.
 
 - [ ] **3.1 — Prediction schema.** Every system — baseline and agent alike — emits the same JSON: `verdict`, `blockers[]` with `type` + `evidence` (a quoted string), `caveats[]`.
 
-- [ ] **3.2 — `src/eval/match.py`.** The fiddly part. Rules:
-  1. Normalize whitespace, locate the agent's quoted evidence in the posting as a substring.
-  2. **Quote not found → evidence hallucination.** Count as a false positive *and* log separately; this is its own reported metric.
-  3. Quote found → compute its span.
-  4. **True positive** = blocker type matches gold **and** spans overlap.
-  5. Right type, wrong location → counts as detected, fails evidence accuracy. Keep detection and evidence as separate metrics; collapsing them hides which one an iteration actually improved.
+- [ ] **3.2 — `src/eval/match.py`.** The fiddly part. **`EVAL.md` §3 is authoritative** — implement it exactly. In short:
+  1. Normalize whitespace on both sides; substring search is case-insensitive.
+  2. **Detection matches on `type` only, one-to-one.** Walk predictions in order; each matches the first not-yet-matched gold blocker of the same type on that posting. Unmatched prediction → FP. Unmatched gold → FN.
+  3. **Evidence is scored separately, over the TPs.** Locate the quote: not found → hallucinated; found → correct if its span overlaps the gold span.
+  4. Hallucination rate is computed over *all* predictions, not just TPs, so fabricated quotes inside false positives are counted.
+
+  Keep detection and evidence as separate metrics. Collapsing them hides which one an iteration improved — and iteration 3 is specifically expected to move evidence while leaving detection flat.
 
 - [ ] **3.3 — `src/eval/metrics.py`.** Per-posting TP/FP/FN → corpus-level recall, false-alarm rate, F1, decision accuracy, evidence accuracy, hallucination rate. Emits a markdown table for direct paste into the changelog.
 
