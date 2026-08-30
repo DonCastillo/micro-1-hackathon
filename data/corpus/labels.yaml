@@ -1,0 +1,366 @@
+seed: 42
+counts:
+  injected: 10
+  clean: 8
+  contradiction: 4
+  multi: 2
+verdicts:
+  SKIP: 16
+  APPLY: 8
+postings:
+- id: jd_01
+  bucket: clean
+  base: base_04_data_engineer_health
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: degree_required
+    phrasing: indirect
+    value: Ph.D.
+    evidence_span:
+    - 241
+    - 296
+    sentence: A Bachelor's degree or equivalent practical experience.
+- id: jd_02
+  bucket: injected
+  base: base_11_integrations_logistics
+  expected_verdict: SKIP
+  blockers:
+  - type: years_of_experience
+    phrasing: explicit
+    value: 12
+    evidence_span:
+    - 749
+    - 826
+    sentence: Minimum of 12 years of professional software engineering experience required.
+  distractors: []
+- id: jd_03
+  bucket: injected
+  base: base_07_application_security
+  expected_verdict: SKIP
+  blockers:
+  - type: citizenship_required
+    phrasing: indirect
+    evidence_span:
+    - 234
+    - 310
+    sentence: Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15).
+  distractors: []
+- id: jd_04
+  bucket: multi
+  base: base_04_data_engineer_health
+  expected_verdict: SKIP
+  blockers:
+  - type: citizenship_required
+    phrasing: footer
+    evidence_span:
+    - 1318
+    - 1407
+    sentence: Due to the nature of our government contracts, employment is restricted to U.S. citizens.
+  - type: degree_required
+    phrasing: indirect
+    value: Master's
+    evidence_span:
+    - 241
+    - 331
+    sentence: Candidates without a Master's in a technical discipline will not be advanced to interview.
+  distractors: []
+- id: jd_05
+  bucket: clean
+  base: base_08_developer_experience
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: professional_licensure
+    phrasing: explicit
+    evidence_span:
+    - 697
+    - 772
+    sentence: Experience in safety-critical or regulated software environments is valued.
+  - type: timezone_overlap
+    phrasing: explicit
+    value: Central European Time
+    evidence_span:
+    - 775
+    - 865
+    sentence: Our team is distributed across time zones and we operate asynchronously wherever possible.
+- id: jd_06
+  bucket: contradiction
+  base: base_05_mobile_ios
+  expected_verdict: SKIP
+  blockers:
+  - type: relocation_required
+    phrasing: title_body_conflict
+    value: Atlanta, GA
+    evidence_span:
+    - 194
+    - 270
+    sentence: You will need to be based in Atlanta, GA within 90 days of joining the team.
+  distractors: []
+- id: jd_07
+  bucket: injected
+  base: base_01_backend_payments
+  expected_verdict: SKIP
+  blockers:
+  - type: professional_licensure
+    phrasing: explicit
+    evidence_span:
+    - 868
+    - 961
+    sentence: Candidates must hold an active Professional Engineer (PE) license in the state of employment.
+  distractors: []
+- id: jd_08
+  bucket: clean
+  base: base_09_ecommerce_fullstack
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: travel_percentage
+    phrasing: footer
+    value: 50
+    evidence_span:
+    - 1303
+    - 1377
+    sentence: Occasional travel to team offsites, typically two or three times per year.
+  - type: shift_oncall
+    phrasing: explicit
+    evidence_span:
+    - 697
+    - 791
+    sentence: We run a business-hours on-call rotation shared across the team, roughly one week per quarter.
+- id: jd_09
+  bucket: injected
+  base: base_07_application_security
+  expected_verdict: SKIP
+  blockers:
+  - type: employment_type
+    phrasing: explicit
+    value: W2 contract
+    evidence_span:
+    - 774
+    - 869
+    sentence: This is a W2 contract position; corp-to-corp and third-party candidates will not be considered.
+  distractors: []
+- id: jd_10
+  bucket: clean
+  base: base_12_civic_nonprofit
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: citizenship_required
+    phrasing: explicit
+    evidence_span:
+    - 712
+    - 791
+    sentence: Our team spans several countries and we welcome applicants from any background.
+  - type: work_authorization
+    phrasing: footer
+    evidence_span:
+    - 1317
+    - 1407
+    sentence: We are a globally distributed team and can discuss sponsorship for exceptional candidates.
+- id: jd_11
+  bucket: contradiction
+  base: base_06_ml_engineer
+  expected_verdict: SKIP
+  blockers:
+  - type: onsite_location
+    phrasing: title_body_conflict
+    value: Seattle, WA
+    evidence_span:
+    - 198
+    - 273
+    sentence: Candidates must reside within commuting distance of our Seattle, WA office.
+  distractors: []
+- id: jd_12
+  bucket: injected
+  base: base_10_gaming_backend
+  expected_verdict: SKIP
+  blockers:
+  - type: relocation_required
+    phrasing: footer
+    value: Atlanta, GA
+    evidence_span:
+    - 1172
+    - 1245
+    sentence: Relocation to Atlanta, GA is a condition of employment for this position.
+  distractors: []
+- id: jd_13
+  bucket: clean
+  base: base_11_integrations_logistics
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: shift_oncall
+    phrasing: indirect
+    evidence_span:
+    - 241
+    - 335
+    sentence: We run a business-hours on-call rotation shared across the team, roughly one week per quarter.
+  - type: citizenship_required
+    phrasing: footer
+    evidence_span:
+    - 1365
+    - 1444
+    sentence: Our team spans several countries and we welcome applicants from any background.
+- id: jd_14
+  bucket: injected
+  base: base_05_mobile_ios
+  expected_verdict: SKIP
+  blockers:
+  - type: onsite_location
+    phrasing: footer
+    value: New York, NY
+    evidence_span:
+    - 1080
+    - 1160
+    sentence: 'Note: this role is not remote-eligible and is tied to our New York, NY location.'
+  distractors: []
+- id: jd_15
+  bucket: injected
+  base: base_10_gaming_backend
+  expected_verdict: SKIP
+  blockers:
+  - type: compensation_floor
+    phrasing: explicit
+    value: 120000
+    evidence_span:
+    - 666
+    - 732
+    sentence: The salary range for this position is $85,000 - $120,000 annually.
+  distractors: []
+- id: jd_16
+  bucket: multi
+  base: base_03_platform_infrastructure
+  expected_verdict: SKIP
+  blockers:
+  - type: years_of_experience
+    phrasing: footer
+    value: 15
+    evidence_span:
+    - 1287
+    - 1360
+    sentence: Candidates with fewer than 15 years of experience will not be considered.
+  - type: certification_required
+    phrasing: explicit
+    value: Certified Kubernetes Administrator
+    evidence_span:
+    - 689
+    - 778
+    sentence: An active Certified Kubernetes Administrator certification is required for this position.
+  distractors: []
+- id: jd_17
+  bucket: clean
+  base: base_01_backend_payments
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: work_authorization
+    phrasing: explicit
+    evidence_span:
+    - 960
+    - 1029
+    sentence: Visa sponsorship may be available depending on the role and location.
+  - type: timezone_overlap
+    phrasing: indirect
+    value: Central European Time
+    evidence_span:
+    - 320
+    - 410
+    sentence: Our team is distributed across time zones and we operate asynchronously wherever possible.
+- id: jd_18
+  bucket: contradiction
+  base: base_02_frontend_design_systems
+  expected_verdict: SKIP
+  blockers:
+  - type: security_clearance
+    phrasing: scoped_negation
+    evidence_span:
+    - 262
+    - 397
+    sentence: Many roles on our team are open to candidates without a clearance. This one requires an
+      active Secret clearance before your start date.
+  distractors: []
+- id: jd_19
+  bucket: injected
+  base: base_06_ml_engineer
+  expected_verdict: SKIP
+  blockers:
+  - type: shift_oncall
+    phrasing: footer
+    evidence_span:
+    - 1220
+    - 1303
+    sentence: 24/7 coverage responsibilities are a core and non-negotiable part of this position.
+  distractors: []
+- id: jd_20
+  bucket: clean
+  base: base_03_platform_infrastructure
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: certification_required
+    phrasing: footer
+    value: AWS Certified Solutions Architect - Professional
+    evidence_span:
+    - 1195
+    - 1251
+    sentence: We will sponsor certification for engineers who want it.
+  - type: travel_percentage
+    phrasing: footer
+    value: 50
+    evidence_span:
+    - 1253
+    - 1327
+    sentence: Occasional travel to team offsites, typically two or three times per year.
+- id: jd_21
+  bucket: injected
+  base: base_02_frontend_design_systems
+  expected_verdict: SKIP
+  blockers:
+  - type: travel_percentage
+    phrasing: indirect
+    value: 60
+    evidence_span:
+    - 262
+    - 327
+    sentence: Expect to spend roughly 60% of each month on-site with customers.
+  distractors: []
+- id: jd_22
+  bucket: clean
+  base: base_09_ecommerce_fullstack
+  expected_verdict: APPLY
+  blockers: []
+  distractors:
+  - type: compensation_floor
+    phrasing: explicit
+    value: 120000
+    evidence_span:
+    - 697
+    - 773
+    sentence: The base range for this role is $160,000 - $195,000 depending on experience.
+- id: jd_23
+  bucket: contradiction
+  base: base_08_developer_experience
+  expected_verdict: SKIP
+  blockers:
+  - type: work_authorization
+    phrasing: scoped_negation
+    evidence_span:
+    - 212
+    - 337
+    sentence: We are able to sponsor visas for a number of our engineering roles. This particular position
+      is not eligible for sponsorship.
+  distractors: []
+- id: jd_24
+  bucket: injected
+  base: base_12_civic_nonprofit
+  expected_verdict: SKIP
+  blockers:
+  - type: work_authorization
+    phrasing: indirect
+    evidence_span:
+    - 204
+    - 264
+    sentence: We are unable to provide visa sponsorship for this position.
+  distractors: []
