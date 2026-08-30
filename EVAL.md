@@ -213,6 +213,24 @@ different numbers.
 **Effect on recorded numbers:** none. The amendment predates the first baseline run;
 no measurement existed when it was made.
 
+### 2026-08-30 — conventions for undefined rates
+
+**Added, not changed.** Section 4 fixed the zero-denominator conventions for
+precision, recall and F1 but left three cases open. Filling them in, since the
+acceptance bar for this document is that a stranger scores a run identically:
+
+- **Evidence-found, evidence-correct** — reported as `n/a` when there were no true
+  positives. A system that detected nothing has no citation quality to measure, and
+  printing `0.0` would read as "cites badly" rather than "never cited".
+- **Hallucination, missing-evidence** — reported as `n/a` when no blockers were claimed
+  at all, for the same reason.
+- **A run with zero scored postings is refused, not scored.** Section 4's conventions
+  compose to precision 1.0 and recall 1.0 on an empty corpus, giving F1 = 1.0 — so a run
+  that crashed before scoring anything would report a *perfect* result. `aggregate()`
+  raises instead. No postings scored is a failure, not a score.
+
+**Effect on recorded numbers:** none; predates the first run.
+
 ---
 
 ## 11. Out of scope
