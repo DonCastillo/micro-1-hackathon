@@ -1,0 +1,32 @@
+# Machine Learning Engineer
+Remote (United States)
+
+## About Halcyon Labs
+Halcyon builds document understanding tools for legal teams. We are twenty-five people and
+about half of us are engineers.
+
+## What you'll do
+- Build and evaluate extraction models over long legal documents
+- Own the evaluation harness, including the parts nobody enjoys owning
+- Take promising research results into production services
+- Work with subject matter experts to define what correct output looks like
+
+## Requirements
+- 4+ years in applied machine learning or ML engineering
+- Strong Python and PyTorch
+- Real experience designing evaluation, not just training loops
+- Ability to read a paper and reproduce the parts that matter
+
+## Nice to have
+- NLP or information extraction background
+- Experience with retrieval systems
+- Prior work in a regulated domain
+
+## Benefits
+- Health, dental, and vision coverage
+- Flexible time off
+- Conference and learning budget
+- Compute for personal projects
+
+## Equal opportunity
+Halcyon Labs is an equal opportunity employer. We consider all qualified applicants without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.

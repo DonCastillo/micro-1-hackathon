@@ -1,0 +1,32 @@
+# Backend Engineer, Multiplayer
+Remote (United States)
+
+## About Tidewell Games
+Tidewell makes cooperative games for small groups. Our matchmaking and session services
+support a few hundred thousand players a month.
+
+## What you'll do
+- Build and operate matchmaking, lobby, and session services
+- Reduce latency and reconnect time for players on poor connections
+- Design for graceful degradation when a region has problems
+- Support live operations for seasonal events
+
+## Requirements
+- 4+ years building networked backend services
+- Strong C# or Go
+- Understanding of UDP, latency, and state synchronization tradeoffs
+- Experience operating services you wrote
+
+## Nice to have
+- Prior games industry experience
+- Familiarity with Unity or Unreal client integration
+- Interest in netcode and rollback techniques
+
+## Benefits
+- Health, dental, and vision coverage
+- Four weeks of paid time off
+- Game budget
+- Home office stipend
+
+## Equal opportunity
+Tidewell Games is an equal opportunity employer. We consider all qualified applicants without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status.
