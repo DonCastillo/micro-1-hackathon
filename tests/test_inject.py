@@ -47,14 +47,35 @@ def test_span_contains_exactly_the_inserted_sentence(case, style, base):
 @pytest.mark.parametrize("case", CASES, ids=_case_id)
 @pytest.mark.parametrize("style", STYLES)
 def test_injection_only_adds_text(case, style):
-    """The original posting must survive intact — nothing deleted or mangled."""
+    """The original posting survives intact, with one deliberate exception.
+
+    A years blocker replaces the base's own years line rather than sitting
+    beneath it — see `drop_existing_years_requirement`. Every other line must
+    still be present.
+    """
+    import re
+
     blocker, value = case
     text = BASES[0].read_text()
     new_text, _, sentence = inject_blocker(text, blocker, style, PROFILE, value)
-    assert len(new_text) > len(text)
+
+    replaces_years = blocker["id"] == "years_of_experience"
     for line in text.splitlines():
-        if line.strip():
-            assert line in new_text, f"injection destroyed the line {line!r}"
+        if not line.strip():
+            continue
+        if replaces_years and re.match(r"^- \d+\+?\s*years", line):
+            assert line not in new_text, "the stale years requirement should be gone"
+            continue
+        assert line in new_text, f"injection destroyed the line {line!r}"
+
+
+@pytest.mark.parametrize("style", STYLES)
+def test_years_injection_leaves_exactly_one_years_figure(style):
+    import re
+
+    yoe = next(b for b in BLOCKERS if b["id"] == "years_of_experience")
+    new_text, _, _ = inject_blocker(BASES[0].read_text(), yoe, style, PROFILE, 12)
+    assert set(re.findall(r"(\d+)\+?\s*years", new_text, re.I)) == {"12"}
 
 
 @pytest.mark.parametrize("case", CASES, ids=_case_id)

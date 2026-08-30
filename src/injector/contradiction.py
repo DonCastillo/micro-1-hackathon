@@ -25,7 +25,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from src.injector.inject import insert
+from src.injector.inject import drop_existing_years_requirement, insert
 from src.rules import blocks
 
 # A title/body conflict needs a header that promises the opposite. Only
@@ -142,6 +142,8 @@ def build_scoped_negation(
         )
     _guard(blocker, profile, value)
 
+    if blocker["id"] == "years_of_experience":
+        text = drop_existing_years_requirement(text)
     sentence = _render(SCOPED_NEGATION[blocker["id"]], blocker, value)
     new_text, span = insert(text, sentence, style)
     return new_text, span, sentence

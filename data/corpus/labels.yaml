@@ -29,8 +29,8 @@ postings:
     phrasing: explicit
     value: 12
     evidence_span:
-    - 749
-    - 826
+    - 700
+    - 777
     sentence: Minimum of 12 years of professional software engineering experience required.
   distractors: []
 - id: jd_03

@@ -70,6 +70,24 @@ def insert(text: str, sentence: str, style: str) -> tuple[str, tuple[int, int]]:
     return new_text, (start, end)
 
 
+_YEARS_BULLET = re.compile(r"^- \d+\+?\s*years[^\n]*\n?", re.M)
+
+
+def drop_existing_years_requirement(text: str) -> str:
+    """Remove the base posting's own years line before injecting a years blocker.
+
+    Every base states a satisfiable years figure, which is deliberate — it
+    tests whether the agent compares against the profile instead of flagging
+    any number it sees. But appending "Minimum of 12 years required" beneath
+    "3+ years of backend engineering" produces a posting no employer would
+    write, and an agent that hesitates over the contradiction would be scored
+    as having missed a blocker when it actually spotted a corpus defect.
+    """
+    body_start, body_end = _section_body(text, "Requirements")
+    body = text[body_start:body_end]
+    return text[:body_start] + _YEARS_BULLET.sub("", body, count=1) + text[body_end:]
+
+
 def render(blocker: dict[str, Any], style: str, value: Any = None) -> str:
     """Fill a phrasing template with its sampled parameter value."""
     phrasing = blocker["phrasings"][style]
@@ -183,6 +201,8 @@ def inject_blocker(
             f"{blocker['id']} with value {value!r} does not block this profile; "
             f"injecting it would invert the label for this posting"
         )
+    if blocker["id"] == "years_of_experience":
+        text = drop_existing_years_requirement(text)
     sentence = render(blocker, style, value)
     new_text, span = insert(text, sentence, style)
     return new_text, span, sentence

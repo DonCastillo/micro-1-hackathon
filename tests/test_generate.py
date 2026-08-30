@@ -188,3 +188,21 @@ def test_a_recorded_value_was_actually_used(posting):
             f"{posting.id}: {mark.type} records value {mark.value!r} "
             f"but it does not appear in {mark.sentence!r}"
         )
+
+
+@pytest.mark.parametrize("posting", CORPUS, ids=_ids)
+def test_no_posting_states_two_conflicting_years_requirements(posting):
+    """A base's own years line must be removed when a years blocker is injected.
+
+    Otherwise the posting reads "3+ years" and "Minimum of 12 years required"
+    in the same list — incoherent, and an agent hesitating over it would be
+    scored as missing a blocker rather than as spotting a corpus defect.
+    """
+    import re
+
+    if not any(m.type == "years_of_experience" for m in posting.blockers):
+        return
+    figures = set(re.findall(r"(\d+)\+?\s*years", posting.text, re.I))
+    assert len(figures) == 1, (
+        f"{posting.id} states conflicting years requirements: {sorted(figures)}"
+    )
