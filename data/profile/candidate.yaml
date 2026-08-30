@@ -1,0 +1,47 @@
+# Candidate profile — SYNTHETIC. Not a real person, not the repo author.
+#
+# This is the profile the benchmark is scored against. It is deliberately
+# constructed so that every one of the 14 blockers in data/taxonomy.yaml
+# actually fires: an injected blocker that doesn't block this profile would
+# be labelled SKIP while the correct verdict is APPLY, silently corrupting
+# the ground truth. tests/test_taxonomy_profile_coupling.py enforces that.
+#
+# If you change any value here, run the tests. Several taxonomy
+# `blocking_values` sit just above these thresholds and will stop blocking
+# if a threshold moves.
+#
+# For the live demo in the video, swap in real constraints locally — but keep
+# the committed profile synthetic so the benchmark stays privacy-clean
+# (ground rules #6, #7).
+#
+# degree ordering (low to high): none < Associate's < Bachelor's < Master's < Ph.D.
+
+label: synthetic-candidate-01
+role_target: Software Engineer
+
+# ─── LEGAL / ELIGIBILITY ──────────────────────────────────────────────────
+work_auth: requires_sponsorship      # citizen | permanent_resident | requires_sponsorship
+citizenship: CA                      # ISO country code; non-US, so ITAR roles block
+clearance: none                      # none | secret | ts_sci
+licenses: []                         # e.g. [PE]
+
+# ─── LOGISTICS ────────────────────────────────────────────────────────────
+location:
+  city: Los Angeles
+  state: CA
+  country: US
+willing_to_relocate: false
+timezone: America/Los_Angeles
+utc_offset: -8
+max_travel_pct: 25
+accepts_night_shift: false
+
+# ─── CREDENTIALS ──────────────────────────────────────────────────────────
+degree: Bachelor's
+certifications: []
+years_experience: 6
+
+# ─── TERMS ────────────────────────────────────────────────────────────────
+employment_types:
+  - Full-time employee
+comp_floor: 140000                   # USD base; skip anything topping out below this
