@@ -1,0 +1,7 @@
+# Direct dependencies. Built and tested on Python 3.14.0 (macOS, arm64).
+# For a byte-exact environment, install requirements.lock.txt instead —
+# it pins the full transitive tree as resolved on 2026-08-30.
+
+anthropic==1.2.0
+PyYAML==6.0.3
+pytest==9.1.1
