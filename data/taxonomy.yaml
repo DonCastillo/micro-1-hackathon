@@ -1,0 +1,246 @@
+# Hard-blocker taxonomy — the ruleset the agent checks a posting against.
+#
+# Every entry here is a HARD blocker: if it is present and it applies to the
+# candidate, the correct verdict is SKIP. Soft signals ("preferred", "a plus",
+# "nice to have") are NOT blockers and live in `distractors` — flagging one is
+# a false alarm, which is scored against the agent just as a miss is.
+#
+# Two kinds:
+#   absolute   — presence alone blocks (given the profile). No value to parse.
+#   parametric — blocks only if the value in the posting crosses a profile
+#                threshold. Phrasings carry a {placeholder}; the injector
+#                samples from `blocking_values`, and the label records which
+#                value it used.
+#
+# Phrasing styles double as placement instructions for the injector (steps 2.2):
+#   explicit → requirements/qualifications section, stated plainly
+#   indirect → mid-body prose, never using the obvious keyword
+#   footer   → benefits / legal / EEO boilerplate, far from the requirements
+#
+# COUPLING WARNING: `blocking_values` must actually block the candidate in
+# data/profile/candidate.yaml. If the profile changes (more years of
+# experience, a higher comp floor), these values must be rechecked or the
+# "injected" cases quietly stop being blockers and the labels become wrong.
+# tests/ should assert this invariant rather than trusting it.
+
+version: 1
+
+groups: [legal, logistics, credentials, terms]
+
+blockers:
+
+  # ─── LEGAL / ELIGIBILITY ────────────────────────────────────────────────
+
+  - id: work_authorization
+    group: legal
+    kind: absolute
+    description: Role does not offer visa sponsorship.
+    profile_field: work_auth
+    blocks_when: {op: equals, value: requires_sponsorship}
+    phrasings:
+      explicit: "Applicants must be legally authorized to work in the United States without the need for current or future employer sponsorship."
+      indirect: "We are unable to provide visa sponsorship for this position."
+      footer: "Please note that this position is not eligible for immigration sponsorship of any kind."
+    distractors:
+      - "We are a globally distributed team and can discuss sponsorship for exceptional candidates."
+      - "Visa sponsorship may be available depending on the role and location."
+
+  - id: citizenship_required
+    group: legal
+    kind: absolute
+    description: Employment restricted to U.S. citizens or ITAR-defined U.S. Persons.
+    profile_field: citizenship
+    blocks_when: {op: not_equals, value: US}
+    phrasings:
+      explicit: "This position requires U.S. citizenship due to federal contract requirements."
+      indirect: "Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15)."
+      footer: "Due to the nature of our government contracts, employment is restricted to U.S. citizens."
+    distractors:
+      - "Our team spans several countries and we welcome applicants from any background."
+
+  - id: security_clearance
+    group: legal
+    kind: absolute
+    description: An active government security clearance is required at time of application.
+    profile_field: clearance
+    blocks_when: {op: equals, value: none}
+    phrasings:
+      explicit: "An active Top Secret/SCI clearance is required at the time of application."
+      indirect: "Candidates must currently hold, and be able to maintain, a U.S. government security clearance."
+      footer: "Selected candidates must hold active Secret clearance prior to their start date."
+    distractors:
+      - "Experience working in cleared environments is a plus."
+      - "Familiarity with FedRAMP or government compliance frameworks is welcome."
+
+  - id: professional_licensure
+    group: legal
+    kind: absolute
+    description: A named professional license is required (regulated / safety-critical work).
+    profile_field: licenses
+    blocks_when: {op: not_contains, value: PE}
+    phrasings:
+      explicit: "Candidates must hold an active Professional Engineer (PE) license in the state of employment."
+      indirect: "Sign-off authority on safety-critical designs requires current PE licensure, which you must already hold."
+      footer: "Licensure will be verified with the state board prior to an offer being extended."
+    distractors:
+      - "Experience in safety-critical or regulated software environments is valued."
+
+  # ─── LOGISTICS ──────────────────────────────────────────────────────────
+
+  - id: onsite_location
+    group: logistics
+    kind: parametric
+    parameter: city
+    description: Role requires working on-site in a specific location.
+    profile_field: location
+    blocks_when: {op: city_mismatch_and_no_relocation}
+    blocking_values: ["Austin, TX", "Seattle, WA", "New York, NY", "Boston, MA"]
+    phrasings:
+      explicit: "This is an on-site role based in our {city} office, five days per week."
+      indirect: "Candidates must reside within commuting distance of our {city} office."
+      footer: "Note: this role is not remote-eligible and is tied to our {city} location."
+    distractors:
+      - "Our {city} office is open to team members who prefer in-person collaboration."
+      - "This role is fully remote, with optional access to our {city} workspace."
+
+  - id: relocation_required
+    group: logistics
+    kind: parametric
+    parameter: city
+    description: Relocation is a condition of employment.
+    profile_field: willing_to_relocate
+    blocks_when: {op: equals, value: false}
+    blocking_values: ["Seattle, WA", "Denver, CO", "Atlanta, GA"]
+    phrasings:
+      explicit: "Selected candidates will be required to relocate to {city} prior to their start date."
+      indirect: "You will need to be based in {city} within 90 days of joining the team."
+      footer: "Relocation to {city} is a condition of employment for this position."
+    distractors:
+      - "Relocation assistance is available for candidates who wish to move to {city}."
+
+  - id: timezone_overlap
+    group: logistics
+    kind: parametric
+    parameter: zone
+    description: Requires sustained working-hours overlap with a specific time zone.
+    profile_field: timezone
+    blocks_when: {op: insufficient_overlap}
+    blocking_values: ["Central European Time", "Singapore Standard Time", "Greenwich Mean Time"]
+    phrasings:
+      explicit: "You must be available to work core hours of 9:00-14:00 {zone}."
+      indirect: "This role requires a minimum of six hours of daily overlap with our team in {zone}."
+      footer: "Applicants unable to sustain {zone} working hours will not be considered."
+    distractors:
+      - "Our team is distributed across time zones and we operate asynchronously wherever possible."
+
+  - id: travel_percentage
+    group: logistics
+    kind: parametric
+    parameter: pct
+    description: Required travel exceeds what the candidate accepts.
+    profile_field: max_travel_pct
+    blocks_when: {op: greater_than_profile}
+    blocking_values: [40, 50, 60]
+    phrasings:
+      explicit: "This position requires up to {pct}% travel to client sites."
+      indirect: "Expect to spend roughly {pct}% of each month on-site with customers."
+      footer: "Regular domestic and international travel ({pct}%) is a requirement of this role."
+    distractors:
+      - "Occasional travel to team offsites, typically two or three times per year."
+
+  - id: shift_oncall
+    group: logistics
+    kind: absolute
+    description: Requires overnight, weekend, or non-standard shift coverage.
+    profile_field: accepts_night_shift
+    blocks_when: {op: equals, value: false}
+    phrasings:
+      explicit: "This role requires participation in a rotating overnight on-call schedule, including weekends."
+      indirect: "Engineers on this team work a Tuesday-Saturday schedule with regular overnight coverage."
+      footer: "24/7 coverage responsibilities are a core and non-negotiable part of this position."
+    distractors:
+      - "We run a business-hours on-call rotation shared across the team, roughly one week per quarter."
+
+  # ─── CREDENTIALS ────────────────────────────────────────────────────────
+
+  - id: degree_required
+    group: credentials
+    kind: parametric
+    parameter: level
+    description: A minimum formal degree level is mandatory, with no experience substitution.
+    profile_field: degree
+    blocks_when: {op: degree_below_required}
+    blocking_values: ["Master's", "Ph.D."]
+    phrasings:
+      explicit: "A {level} degree in Computer Science or a closely related field is required."
+      indirect: "Candidates without a {level} in a technical discipline will not be advanced to interview."
+      footer: "Educational requirement: {level} or higher, verified prior to offer."
+    distractors:
+      - "A Bachelor's degree or equivalent practical experience."
+      - "Advanced degree in a quantitative field is a plus."
+
+  - id: certification_required
+    group: credentials
+    kind: parametric
+    parameter: cert
+    description: A named professional certification must be active at time of hire.
+    profile_field: certifications
+    blocks_when: {op: not_contains_parameter}
+    blocking_values: ["AWS Certified Solutions Architect - Professional", "CISSP", "Certified Kubernetes Administrator"]
+    phrasings:
+      explicit: "An active {cert} certification is required for this position."
+      indirect: "You must already hold {cert} certification to be considered."
+      footer: "{cert} certification must be active and verifiable at time of hire."
+    distractors:
+      - "AWS or GCP certification is a plus."
+      - "We will sponsor certification for engineers who want it."
+
+  - id: years_of_experience
+    group: credentials
+    kind: parametric
+    parameter: years
+    description: A hard minimum years-of-experience floor, stated as required rather than preferred.
+    profile_field: years_experience
+    blocks_when: {op: greater_than_profile}
+    blocking_values: [10, 12, 15]
+    phrasings:
+      explicit: "Minimum of {years} years of professional software engineering experience required."
+      indirect: "We are looking for engineers with at least {years} years of production experience; this is a firm requirement."
+      footer: "Candidates with fewer than {years} years of experience will not be considered."
+    distractors:
+      # The single most important distractor in the file: "preferred" is not
+      # "required". Conflating them is the dominant false-alarm mode.
+      - "8+ years of experience preferred."
+      - "Ideally you bring 10+ years of experience, though we value depth over tenure."
+
+  # ─── TERMS ──────────────────────────────────────────────────────────────
+
+  - id: employment_type
+    group: terms
+    kind: parametric
+    parameter: type
+    description: Engagement model excludes the candidate's acceptable arrangements.
+    profile_field: employment_types
+    blocks_when: {op: not_contains_parameter}
+    blocking_values: ["W2 contract", "1099 contract"]
+    phrasings:
+      explicit: "This is a {type} position; corp-to-corp and third-party candidates will not be considered."
+      indirect: "We are only able to engage candidates directly as a {type} for this opening."
+      footer: "No agencies. No corp-to-corp. {type} only."
+    distractors:
+      - "This role is open to both full-time employees and contractors."
+
+  - id: compensation_floor
+    group: terms
+    kind: parametric
+    parameter: band_max
+    description: The top of the posted salary band falls below the candidate's minimum.
+    profile_field: comp_floor
+    blocks_when: {op: less_than_profile}
+    blocking_values: [105000, 115000, 120000]
+    phrasings:
+      explicit: "The salary range for this position is $85,000 - ${band_max} annually."
+      indirect: "Budgeted compensation for this role tops out at ${band_max}."
+      footer: "Compensation: up to ${band_max}. This range is firm and not negotiable."
+    distractors:
+      - "The base range for this role is $160,000 - $195,000 depending on experience."
