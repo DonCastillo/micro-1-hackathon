@@ -110,7 +110,8 @@ all 24 by hand.
 | **Decision accuracy** | Postings whose predicted verdict equals the gold verdict, / 24. |
 | **Evidence-found rate** | TPs whose quote was located in the posting, / TPs. |
 | **Evidence-correct rate** | TPs whose quote was located *and* overlaps the gold span, / TPs. |
-| **Hallucination rate** | *All* predicted blockers whose quote was not found in the posting, / all predicted blockers. Computed over every prediction, not just TPs, so fabricated quotes inside false positives are counted too. |
+| **Hallucination rate** | Predicted blockers that supplied a quote which was **not found** in the posting, / all predicted blockers. Computed over every prediction, not just TPs, so fabricated quotes inside false positives are counted too. |
+| **Missing-evidence rate** | Predicted blockers that supplied **no quote at all**, / all predicted blockers. Reported separately from hallucination — see amendment 2026-08-30. |
 | **Human time per task** | Section 7. |
 | **Cost per task** | Total USD from `response.usage` across every call for a posting, / 24. |
 
@@ -194,7 +195,23 @@ Changes to this protocol after the baseline is measured go here, dated, with the
 and the effect on already-recorded numbers. An empty section at submission is the
 expected outcome.
 
-*(none yet)*
+### 2026-08-30 — split missing evidence out of the hallucination rate
+
+**Was:** hallucination rate counted every predicted blocker "whose quote was not found in
+the posting", which includes blockers reported with no quote at all.
+
+**Now:** hallucination counts only blockers that supplied a quote that could not be found.
+Blockers with no quote are counted under a separate missing-evidence rate.
+
+**Why:** the baseline is deliberately never asked for evidence (section 9), so under the
+original wording it would have scored close to a 100% hallucination rate — reported as if
+it were fabricating quotes, when it had simply not been asked for any. That would have
+overstated the agent's advantage on a metric where the baseline was never competing.
+Fabricating a citation and declining to give one are different failures and now read as
+different numbers.
+
+**Effect on recorded numbers:** none. The amendment predates the first baseline run;
+no measurement existed when it was made.
 
 ---
 
