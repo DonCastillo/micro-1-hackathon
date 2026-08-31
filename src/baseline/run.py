@@ -31,6 +31,7 @@ import yaml
 from src import llm
 from src.rules import load_profile, load_taxonomy
 from src.schema import Claim, ParseError, Prediction
+from src.trajectory import Recorder
 
 ROOT = Path(__file__).resolve().parent.parent.parent
 CORPUS = ROOT / "data/corpus"
@@ -134,6 +135,7 @@ def main() -> None:
     parser.add_argument("--out", type=Path, help="directory for predictions.json")
     parser.add_argument("--dry-run", action="store_true", help="print one prompt, call nothing")
     parser.add_argument("--limit", type=int, help="only the first N postings (smoke runs)")
+    parser.add_argument("--runs", type=Path, help="where to write trajectories (default runs/)")
     args = parser.parse_args()
 
     profile = load_profile()
@@ -150,33 +152,41 @@ def main() -> None:
         print(f"=== model: {llm.model_id()}  effort: {llm.effort()} ===")
         return
 
+    recorder = Recorder("baseline", corpus=args.corpus, root=args.runs)
     predictions: dict[str, Any] = {}
-    total = llm.Usage()
 
     for posting_id, text in postings:
-        response = llm.call(SYSTEM, build_prompt(text, profile, blocker_ids))
-        total.add(response.usage)
+        traj = recorder.trajectory(posting_id)
+        response = traj.call("ask", SYSTEM, build_prompt(text, profile, blocker_ids))
         try:
             prediction = parse_baseline_output(response.text, blocker_ids)
         except ParseError as exc:
             prediction = Prediction.unparseable(str(exc))
+            traj.note("parse_failure", f"could not read a verdict: {exc}")
+
         predictions[posting_id] = prediction.to_dict()
+        recorder.finish(traj, prediction.to_dict())
+
         flag = "!" if prediction.parse_error else " "
         print(f"{flag} {posting_id}  {prediction.verdict:6} "
-              f"{len(prediction.blockers)} blockers  ${total.cost_usd:.4f}")
+              f"{len(prediction.blockers)} blockers  ${recorder.total.cost_usd:.4f}")
+
+    recorder.write_manifest()
+    print(f"\ntrajectories: {recorder.dir}")
 
     payload = {
         "system": "baseline",
         "model": llm.model_id(),
         "effort": llm.effort(),
-        "usage": total.to_dict(),
+        "usage": recorder.total.to_dict(),
+        "trajectories": str(recorder.dir),
         "predictions": predictions,
     }
 
     if args.out:
         args.out.mkdir(parents=True, exist_ok=True)
         (args.out / "predictions.json").write_text(json.dumps(payload, indent=2) + "\n")
-        print(f"\nwrote {args.out}/predictions.json  total ${total.cost_usd:.4f}")
+        print(f"wrote {args.out}/predictions.json  total ${recorder.total.cost_usd:.4f}")
     else:
         print(json.dumps(payload, indent=2))
 
