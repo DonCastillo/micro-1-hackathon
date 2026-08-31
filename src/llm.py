@@ -89,7 +89,13 @@ def _client() -> anthropic.Anthropic:
         raise RuntimeError(
             "ANTHROPIC_API_KEY is not set. Run: set -a; source .env; set +a"
         )
-    return anthropic.Anthropic()
+
+    # An identity-linked key belongs to an organisation rather than to a single
+    # workspace, so the API cannot infer which workspace to bill and returns a
+    # 400 until one is named.
+    workspace = os.environ.get("ANTHROPIC_WORKSPACE_ID")
+    headers = {"anthropic-workspace-id": workspace} if workspace else None
+    return anthropic.Anthropic(default_headers=headers)
 
 
 def call(
