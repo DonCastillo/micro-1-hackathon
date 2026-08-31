@@ -49,7 +49,7 @@ run second so some speed is practice. Direction solid, magnitude indicative.
 
 | | Baseline | Final |
 |---|---|---|
-| Cost per task | $0.0051 | **$0.0045** |
+| Cost per task (median of 3) | $0.0049 | **$0.0044** |
 | Input tokens / 24 postings | 20,657 | 37,913 |
 | Output tokens / 24 postings | 7,678 | 3,186 |
 
