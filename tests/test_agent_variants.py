@@ -283,3 +283,90 @@ def test_iteration3_asks_for_verbatim_quotes():
     assert "exactly as it appears" in ITER3_GROUP_PROMPT
     assert "do not paraphrase" in ITER3_GROUP_PROMPT.lower()
     assert "if you cannot find a sentence" in ITER3_GROUP_PROMPT.lower()
+
+
+# ─── iteration 4: reject-only verification ────────────────────────────────
+
+def _traj_recording(replies):
+    from src.trajectory import Trajectory
+
+    it = iter(replies)
+
+    class _Rec(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            self.steps.append(type("S", (), {"name": name, "user": user})())
+
+            class _R:
+                text = next(it)
+
+            return _R()
+
+        def note(self, name, text):  # type: ignore[override]
+            self.steps.append(type("S", (), {"name": name, "user": text})())
+
+    return _Rec(posting_id="jd_test")
+
+
+POSTING = (
+    "# Role\nRemote (United States)\n\n## About Co\nWe build things.\n\n"
+    "## Requirements\n- 5+ years\n- We are unable to provide visa sponsorship "
+    "for this position.\n\n## Benefits\n- Health\n\n## Equal opportunity\nCo is "
+    "an equal opportunity employer.\n"
+)
+
+
+def test_iteration4_drops_a_quote_that_is_not_in_the_posting():
+    """The fabricated citation, caught mechanically and for free."""
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "Role does not offer visa sponsorship."}]}',
+    ])
+    p = VARIANTS["iter4"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    assert p.blockers == [], "an ungrounded quote is not evidence"
+    assert any(s.name == "reject_ungrounded" for s in traj.steps)
+
+
+def test_iteration4_drops_a_real_but_irrelevant_quote():
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "Co is an equal opportunity employer."}]}',
+        "REJECT",
+    ])
+    p = VARIANTS["iter4"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    assert p.blockers == []
+    assert any(s.name == "reject_irrelevant" for s in traj.steps)
+
+
+def test_iteration4_keeps_a_supported_claim():
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "We are unable to provide visa sponsorship for this position."}]}',
+        "KEEP",
+    ])
+    p = VARIANTS["iter4"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    assert [c.type for c in p.blockers] == ["work_authorization"]
+    assert p.verdict == "SKIP"
+
+
+def test_verification_never_adds_a_claim():
+    """A verifier that could add findings would be a second detector, and its
+    errors would be indistinguishable from the first pass's."""
+    traj = _traj_recording(['{"blockers": []}'])
+    p = VARIANTS["iter4"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    assert p.blockers == [] and p.verdict == "APPLY"
+    assert not any(s.name.startswith("verify_") for s in traj.steps), (
+        "nothing to verify when nothing was claimed"
+    )
+
+
+def test_verifier_is_not_shown_the_posting():
+    """Given the whole posting it could re-derive the claim it is checking."""
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "We are unable to provide visa sponsorship for this position."}]}',
+        "KEEP",
+    ])
+    VARIANTS["iter4"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    verify = next(s for s in traj.steps if s.name.startswith("verify_"))
+    assert "## Requirements" not in verify.user
+    assert "5+ years" not in verify.user

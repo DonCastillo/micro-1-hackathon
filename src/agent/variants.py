@@ -20,6 +20,7 @@ import yaml
 
 from src.baseline.run import SYSTEM as BASELINE_SYSTEM
 from src.baseline.run import extract_declared_blockers, parse_baseline_output
+from src.eval.match import locate
 from src.schema import Claim, Prediction, parse_claims_json
 from src.trajectory import Trajectory
 
@@ -336,9 +337,100 @@ class Iteration3Single:
         return Prediction(verdict="SKIP" if found else "APPLY", blockers=found)
 
 
+VERIFY_PROMPT = """\
+A job posting was checked against someone's background, and one condition was
+reported as disqualifying them. A sentence from the posting was quoted as proof.
+
+Condition: {blocker_id} — {description}
+
+Quoted sentence: "{evidence}"
+
+Does that sentence, by itself, state that condition? Judge only the sentence.
+Do not consider what the rest of the posting might say, and do not consider
+whether the condition is plausible for this kind of role.
+
+Answer with one word: KEEP if the sentence states the condition, REJECT if it
+does not.
+"""
+
+
+class Iteration4:
+    """iter3s, plus two filters that can only remove claims.
+
+    From iteration 3's failure analysis: every surviving false positive was
+    `work_authorization` claimed on a posting that never mentions sponsorship.
+    The model treats silence as a blocker, and when asked for a quote it
+    supplies one anyway — one fabricated, two real but unrelated.
+
+    Two filters, deliberately different in kind:
+
+    1. **Grounding**, mechanical and free: a quote that is not in the posting
+       is not evidence. Catches the fabricated citation with no API call.
+    2. **Relevance**, one short model call per surviving claim: does this
+       sentence state this condition? The verifier sees the condition and the
+       quote and nothing else — showing it the whole posting would let it
+       re-derive the claim it is supposed to be checking.
+
+    Neither filter can add a claim. A verifier that could add findings would be
+    a second detector, and its errors would be indistinguishable from the
+    first pass's.
+
+    Predicted: precision rises toward 1.0, recall unchanged, hallucination 0%.
+    If jd_14 and jd_19 survive, then quoting an unrelated real sentence fools a
+    checker too, and the verifier needs to compare quote against condition more
+    sharply than this prompt manages.
+    """
+
+    name = "iter4"
+    description = "iter3s + grounding check + relevance verification (reject-only)"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        prompt = ITER3S_PROMPT.format(
+            profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+            posting=posting.strip(),
+            definitions=blocker_definitions(taxonomy),
+        )
+        response = traj.call("detect", BASELINE_SYSTEM, prompt)
+
+        by_id = {b["id"]: b for b in taxonomy["blockers"]}
+        candidates = [c for c in parse_claims_json(response.text) if c.type in by_id]
+
+        kept: list[Claim] = []
+        for claim in candidates:
+            if not claim.evidence or not locate(posting, claim.evidence):
+                traj.note(
+                    "reject_ungrounded",
+                    f"{claim.type}: quoted text is not in the posting — "
+                    f"{claim.evidence[:80]!r}",
+                )
+                continue
+
+            verdict = traj.call(
+                f"verify_{claim.type}",
+                BASELINE_SYSTEM,
+                VERIFY_PROMPT.format(
+                    blocker_id=claim.type,
+                    description=by_id[claim.type]["description"],
+                    evidence=claim.evidence,
+                ),
+            )
+            if "REJECT" in verdict.text.upper():
+                traj.note(
+                    "reject_irrelevant",
+                    f"{claim.type}: the quoted sentence does not state the condition",
+                )
+                continue
+            kept.append(claim)
+
+        return Prediction(verdict="SKIP" if kept else "APPLY", blockers=kept)
+
+
 VARIANTS: dict[str, Variant] = {
     "iter1": Iteration1(),
     "iter2": Iteration2(),
     "iter3": Iteration3(),
     "iter3s": Iteration3Single(),
+    "iter4": Iteration4(),
 }

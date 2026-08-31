@@ -13,6 +13,8 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 | **Iteration 2** | Four independent per-group checks, merged — iteration 1 found one blocker and stopped | **F1 0.850** (−0.064) · recall 0.889 → 0.944, precision 0.941 → 0.773 | **Removed.** Hypothesis confirmed *and* the change lost: narrowing the question removed the cross-group competition that suppressed marginal claims |
 | **Iteration 3** | Every claim must quote the posting verbatim (on top of decomposition) | **F1 0.865** · evidence-correct **0% → 100%** | Precision partly recovered, but still short of iteration 1 at 2× the cost |
 | **Iteration 3s** | The same evidence requirement with decomposition **removed** — the isolation test | **F1 0.895** · recall 0.944 · evidence 100% · **$0.0042/task, the cheapest variant** | **Kept.** Evidence was doing all the work; decomposition was contributing nothing but cost |
+| **Iteration 3s + grounding** | Drop any claim whose quote is not in the posting — mechanical, no API call | **F1 0.919** · precision 0.850 → 0.895 · hallucination → 0% | **Kept.** Free, deterministic, no regressions |
+| **Iteration 4** | Ask the model whether each quote states its condition; reject-only | **F1 0.909** · precision **1.000** · recall 0.944 → **0.833** · decision accuracy 100% → **91.7%** | **Half kept.** Perfect precision bought by rejecting two real blockers — the verifier could not see the profile, so it could not judge relational conditions |
 
 ---
 
@@ -337,3 +339,89 @@ Predicted: precision rises toward 1.0, recall unchanged, hallucination to 0%. If
 `jd_14` and `jd_19` claims survive verification, then quoting an unrelated real sentence is
 enough to pass a checker too, and the next move is to make the verifier compare the quote
 against the *condition* rather than against the posting.
+
+
+---
+
+## Iteration 4 — reject-only verification
+
+**What and why.** Every false positive surviving iteration 3s was `work_authorization`
+claimed on a posting that never mentions sponsorship, justified by a quote that was either
+fabricated or real-but-unrelated. Two filters, both of which can only *remove* claims:
+
+1. **Grounding** — mechanical: a quote that is not in the posting is not evidence.
+2. **Relevance** — one short model call per surviving claim: does this sentence state this
+   condition?
+
+Neither may add a claim. A verifier that could add findings would be a second detector, and
+its errors would be indistinguishable from the first pass's.
+
+### The grounding filter — kept, and it was free
+
+It required no API call at all, since it is a string search the harness was already able to
+do. Applied to iteration 3s's existing output:
+
+| | Iteration 3s | + grounding |
+|---|---|---|
+| **Detection F1** | 0.895 | **0.919** |
+| Precision | 0.850 | 0.895 |
+| Hallucinated quotes | 5% | **0%** |
+| Recall / decision accuracy | 0.944 / 100% | unchanged |
+| Cost | $0.0042 | **$0.0042** |
+
+The single claim it dropped was the fabricated citation on `jd_12` — the model had quoted
+back *my own definition text* as though it were a line from the posting.
+
+### The relevance verifier — did what was asked and cost more than it gained
+
+**Predicted:** precision rises toward 1.0, recall unchanged.
+
+| | iter3s + grounding | Iteration 4 |
+|---|---|---|
+| **Detection F1** | **0.919** | 0.909 |
+| Precision | 0.895 | **1.000** |
+| Recall | **0.944** | 0.833 |
+| **Decision accuracy** | **100%** | **91.7%** |
+| Cost per task | $0.0042 | $0.0047 |
+
+Precision reached 1.000 — every remaining false positive gone, exactly as predicted. It
+also rejected **two true blockers**, and for the first time in the project the tool told
+the applicant to apply to jobs they are barred from. Decision accuracy had been 100% and
+stable at spread 0.000 across every previous run.
+
+**Why it over-rejected — the useful part.** Both wrongly rejected claims are *relational*
+conditions, and my verifier prompt made them impossible to judge:
+
+```
+jd_15  compensation_floor
+       quote: "The salary range for this position is $85,000 - $120,000 annually."
+       Does that sentence state "the band falls below the candidate's minimum"?
+       Not on its own. It states a band. Whether that band blocks depends on a
+       number the verifier was never shown.
+
+jd_18  security_clearance
+       quote: "Many roles on our team are open to candidates without a clearance.
+               This one requires an active Secret clearance before your start date."
+       The condition says "at time of application"; the sentence says "before your
+       start date". Judged in isolation, close enough to reject.
+```
+
+The prompt said *"Judge only the sentence. Do not consider what the rest of the posting
+might say."* That instruction was written to stop the verifier re-deriving the claim it was
+meant to check — and it worked, at the price of withholding the candidate profile, without
+which a salary band is just a number.
+
+**A verifier cannot check a relational condition from one side of the relation.** Half these
+conditions are comparisons — band against floor, years against experience, city against
+location — and for those, "does this sentence state the condition?" is not a well-formed
+question.
+
+**Decision — grounding kept, relevance verification revised rather than removed.** The
+mechanism is sound: it removed every genuine false positive and reached perfect precision.
+The prompt is wrong. Iteration 5 gives the verifier the one profile field the condition is
+decided by (`taxonomy.profile_field`, already in the data) and asks the comparison directly:
+*"the posting says X; the candidate's `comp_floor` is Y; does X disqualify them?"* — still
+reject-only, still blind to the rest of the posting.
+
+**Current best configuration: iteration 3s + grounding.** F1 0.919, recall 0.944, precision
+0.895, evidence 100%, decision accuracy 100%, $0.0042 per task — cheaper than the baseline.

@@ -1,0 +1,229 @@
+{
+  "system": "iter3s+grounding",
+  "description": "iter3s with quotes mechanically checked against the posting",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "usage": {
+    "calls": 24,
+    "input_tokens": 37913,
+    "output_tokens": 2613,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "cost_usd": 0.101956
+  },
+  "trajectories": "/Users/doncastillo/Code/hackathon/micro1/runs/20260831-070438_iter3s",
+  "predictions": {
+    "jd_01": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_02": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "years_of_experience",
+          "evidence": "Minimum of 12 years of professional software engineering experience required."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_03": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": "Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15)."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_04": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": "Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15)."
+        },
+        {
+          "type": "employment_type",
+          "evidence": "This is a W2 contract position; corp-to-corp and third-party candidates will not be considered."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_05": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_06": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "relocation_required",
+          "evidence": "You will need to be based in Seattle, WA within 90 days of joining the team."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_07": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "professional_licensure",
+          "evidence": "Candidates must hold an active Professional Engineer (PE) license in the state of employment."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_08": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_09": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "employment_type",
+          "evidence": "This is a W2 contract position; corp-to-corp and third-party candidates will not be considered."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_10": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_11": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "onsite_location",
+          "evidence": "Candidates must reside within commuting distance of our Austin, TX office."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_12": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "relocation_required",
+          "evidence": "Relocation to Seattle, WA is a condition of employment for this position."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_13": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_14": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "onsite_location",
+          "evidence": "Note: this role is not remote-eligible and is tied to our Boston, MA location."
+        },
+        {
+          "type": "work_authorization",
+          "evidence": "Foldstar is an equal opportunity employer. We consider all qualified applicants without regard to race, color, religion, sex, sexual orientation, gender identity, national origin, disability, or veteran status."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_15": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "compensation_floor",
+          "evidence": "The salary range for this position is $85,000 - $120,000 annually."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_16": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": "Applicants must qualify as a U.S. Person as defined by ITAR (22 CFR 120.15)."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_17": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_18": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "security_clearance",
+          "evidence": "This one requires an active Secret clearance before your start date."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_19": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "work_authorization",
+          "evidence": "4+ years in applied machine learning or ML engineering"
+        },
+        {
+          "type": "shift_oncall",
+          "evidence": "24/7 coverage responsibilities are a core and non-negotiable part of this position."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_20": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_21": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "travel_percentage",
+          "evidence": "Expect to spend roughly 60% of each month on-site with customers."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_22": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_23": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "work_authorization",
+          "evidence": "This particular position is not eligible for sponsorship."
+        }
+      ],
+      "caveats": []
+    },
+    "jd_24": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "work_authorization",
+          "evidence": "We are unable to provide visa sponsorship for this position."
+        }
+      ],
+      "caveats": []
+    }
+  }
+}
