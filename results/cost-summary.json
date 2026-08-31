@@ -1,0 +1,138 @@
+{
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "pricing_usd_per_mtok": {
+    "input": 2.0,
+    "output": 10.0
+  },
+  "full_project": {
+    "runs": 12,
+    "calls": 469,
+    "input_tokens": 532835,
+    "output_tokens": 60446,
+    "cost_usd": 1.6701,
+    "wall_minutes": 23.3,
+    "note": "every variant including the three that were removed; excludes two 3-posting smoke runs"
+  },
+  "reproduce_headline": {
+    "what": "3 baseline runs + 3 final runs",
+    "calls": 144,
+    "cost_usd": 0.6694,
+    "wall_minutes": 9.2
+  },
+  "cost_per_task": {
+    "baseline": 0.0051,
+    "final": 0.0045,
+    "change": "-12%"
+  },
+  "runs": [
+    {
+      "run": "20260831-030332_baseline",
+      "variant": "baseline",
+      "calls": 24,
+      "input_tokens": 20657,
+      "output_tokens": 8018,
+      "cost_usd": 0.1215,
+      "seconds": 116
+    },
+    {
+      "run": "20260831-042939_baseline",
+      "variant": "baseline",
+      "calls": 24,
+      "input_tokens": 20657,
+      "output_tokens": 7528,
+      "cost_usd": 0.1166,
+      "seconds": 117
+    },
+    {
+      "run": "20260831-043223_baseline",
+      "variant": "baseline",
+      "calls": 24,
+      "input_tokens": 20657,
+      "output_tokens": 7678,
+      "cost_usd": 0.1181,
+      "seconds": 106
+    },
+    {
+      "run": "20260831-052055_iter1",
+      "variant": "iter1",
+      "calls": 24,
+      "input_tokens": 35369,
+      "output_tokens": 4845,
+      "cost_usd": 0.1192,
+      "seconds": 95
+    },
+    {
+      "run": "20260831-062911_iter2",
+      "variant": "iter2",
+      "calls": 96,
+      "input_tokens": 93236,
+      "output_tokens": 11200,
+      "cost_usd": 0.2985,
+      "seconds": 275
+    },
+    {
+      "run": "20260831-070031_iter3",
+      "variant": "iter3",
+      "calls": 96,
+      "input_tokens": 105428,
+      "output_tokens": 3759,
+      "cost_usd": 0.2484,
+      "seconds": 208
+    },
+    {
+      "run": "20260831-070438_iter3s",
+      "variant": "iter3s",
+      "calls": 24,
+      "input_tokens": 37913,
+      "output_tokens": 2613,
+      "cost_usd": 0.102,
+      "seconds": 74
+    },
+    {
+      "run": "20260831-072126_iter4",
+      "variant": "iter4",
+      "calls": 41,
+      "input_tokens": 41901,
+      "output_tokens": 2881,
+      "cost_usd": 0.1126,
+      "seconds": 91
+    },
+    {
+      "run": "20260831-081825_iter5",
+      "variant": "iter5",
+      "calls": 44,
+      "input_tokens": 43278,
+      "output_tokens": 3354,
+      "cost_usd": 0.1201,
+      "seconds": 107
+    },
+    {
+      "run": "20260831-082146_final",
+      "variant": "final",
+      "calls": 24,
+      "input_tokens": 37913,
+      "output_tokens": 2920,
+      "cost_usd": 0.105,
+      "seconds": 67
+    },
+    {
+      "run": "20260831-083739_final",
+      "variant": "final",
+      "calls": 24,
+      "input_tokens": 37913,
+      "output_tokens": 2464,
+      "cost_usd": 0.1005,
+      "seconds": 61
+    },
+    {
+      "run": "20260831-083928_final",
+      "variant": "final",
+      "calls": 24,
+      "input_tokens": 37913,
+      "output_tokens": 3186,
+      "cost_usd": 0.1077,
+      "seconds": 83
+    }
+  ]
+}

@@ -554,6 +554,42 @@ the assisted pass followed the manual one so some speed is practice rather than 
 direction is solid; the magnitude is indicative. A controlled version would use naive
 reviewers, counterbalanced order, and unseen postings.
 
+### Cost
+
+All figures from `response.usage`, priced at `claude-sonnet-5`'s published rates
+($2.00 / $10.00 per million tokens). Full detail in `results/cost-summary.json`.
+
+| | Baseline | Final |
+|---|---|---|
+| Cost per task | $0.0051 | **$0.0045** |
+| Input tokens (24 postings) | 20,657 | 37,913 |
+| Output tokens (24 postings) | 8,018 | 3,186 |
+| Calls per posting | 1 | 1 |
+
+**The final system is cheaper despite an 83% larger prompt**, because requiring JSON with
+quoted evidence cut output tokens by 60% — and output is priced 5× higher than input.
+The definitions and the evidence requirement pay for themselves twice: once in accuracy,
+once in tokens.
+
+Cost by variant, per task, showing what the removed branches would have cost:
+
+| Variant | Calls/posting | Cost/task | Kept |
+|---|---|---|---|
+| Baseline | 1 | $0.0051 | — |
+| Iteration 1 | 1 | $0.0050 | yes |
+| Iteration 2 (decomposition) | 4 | $0.0124 | **removed** |
+| Iteration 3 (decomp + evidence) | 4 | $0.0104 | **removed** |
+| Iteration 4 (verification) | 1 + 1/claim | $0.0047 | **removed** |
+| Iteration 5 (profile-aware verification) | 1 + 1/claim | $0.0050 | **removed** |
+| **Final** | 1 | **$0.0045** | **yes** |
+
+Every branch that was removed also cost more than the one that survived.
+
+**Whole project:** 12 full runs, 469 API calls, 533K input and 60K output tokens,
+**$1.67** and 23 minutes of wall time — including all four variants that were removed.
+Reproducing just the headline comparison (3 baseline + 3 final runs) costs **$0.67** and
+takes about 9 minutes.
+
 **What the saving is really worth.** Ninety seconds a posting is not a large number in
 absolute terms. What makes it worth saving is that roughly two thirds of it was being spent
 on postings the applicant was never eligible for — the value is not the minutes, it is that
