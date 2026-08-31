@@ -18,4 +18,5 @@ __pycache__/
 # committed explicitly under runs/curated/ (see steps.md 7.3).
 runs/*
 !runs/curated/
+!runs/agent-traces/
 !runs/.gitkeep

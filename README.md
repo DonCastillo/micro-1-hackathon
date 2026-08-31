@@ -282,6 +282,33 @@ Nothing here has been measured on a real job board.
 are documented in the changelog. Both reached perfect precision by also rejecting real
 blockers, and neither recovered the decision accuracy the single pass already had.
 
+## Coding agents used
+
+Required disclosure.
+
+**Every line of this repository — code, tests, corpus, documentation and analysis — was
+written by Claude Opus 5 running in Claude Code**, directed turn by turn by the participant.
+No part of it was hand-written.
+
+| | |
+|---|---|
+| Agent | Claude Opus 5 via Claude Code |
+| Human turns | 115 |
+| Tool calls | 288 |
+| Commits | 30, each carrying `Co-Authored-By: Claude Opus 5` |
+
+Two sets of trajectories are submitted, because the deliverable is ambiguous between them:
+
+- **`runs/agent-traces/`** — the *development* trajectory. The complete Claude Code session
+  transcript, plus `human-checkpoints.md` listing all 115 instructions the participant gave.
+  Redacted for credentials only; the agent's mistakes, failed tests and corrected claims are
+  all present.
+- **`runs/curated/`** — the *product* trajectories. Seven traces of the blocker detector
+  itself running against job postings.
+
+The system this project delivers is also agent-based: one Claude API call per posting,
+described in [How it works](#how-it-works).
+
 ## Ground rules
 
 Synthetic data throughout; no private information, no scraped postings. The tool is
