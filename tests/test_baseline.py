@@ -59,24 +59,75 @@ def test_prose_with_no_verdict_is_a_parse_failure():
 
 # ─── blocker extraction ───────────────────────────────────────────────────
 
-def test_named_label_is_claimed():
-    text = "Skip it. The blocker is work_authorization."
+def test_declared_blocker_is_claimed():
+    text = "They can't sponsor.\n\nVERDICT: SKIP\nBLOCKERS: work_authorization"
     p = parse_baseline_output(text, IDS)
+    assert p.verdict == "SKIP"
     assert [c.type for c in p.blockers] == ["work_authorization"]
 
 
-def test_label_written_as_prose_is_recognised():
+def test_label_written_as_prose_on_the_line_is_recognised():
     """Models reformat ids: 'work authorization' rather than 'work_authorization'."""
-    text = "Skip — this fails on work authorization grounds."
+    text = "VERDICT: SKIP\nBLOCKERS: work authorization"
     assert [c.type for c in parse_baseline_output(text, IDS).blockers] == ["work_authorization"]
 
 
-def test_several_labels_are_all_claimed():
-    text = "Skip. Both security_clearance and citizenship_required apply here."
+def test_several_declared_labels_are_all_claimed():
+    text = "VERDICT: SKIP\nBLOCKERS: security_clearance, citizenship_required"
     assert set(c.type for c in parse_baseline_output(text, IDS).blockers) == {
         "security_clearance",
         "citizenship_required",
     }
+
+
+def test_none_means_no_blockers():
+    p = parse_baseline_output("VERDICT: APPLY\nBLOCKERS: NONE", IDS)
+    assert p.verdict == "APPLY" and p.blockers == []
+
+
+def test_markdown_bolding_around_the_lines_is_tolerated():
+    """Models bold these lines unprompted."""
+    text = "**VERDICT:** SKIP\n**BLOCKERS:** citizenship_required"
+    p = parse_baseline_output(text, IDS)
+    assert p.verdict == "SKIP"
+    assert [c.type for c in p.blockers] == ["citizenship_required"]
+
+
+# ─── the two real misreadings from the smoke run ──────────────────────────
+
+def test_a_satisfied_requirement_is_not_a_claimed_blocker():
+    """From a real response: the model said the requirement was *met*.
+
+    "your 6 years of experience clears the 5+ requirement" contains the literal
+    phrase "years of experience", and scanning the body counted it as a claim.
+    """
+    text = (
+        "Your 6 years of experience clears the 5+ requirement, but ITAR is a hard bar.\n"
+        "VERDICT: SKIP\nBLOCKERS: citizenship_required"
+    )
+    assert [c.type for c in parse_baseline_output(text, IDS).blockers] == [
+        "citizenship_required"
+    ]
+
+
+def test_a_negated_disqualifier_is_not_a_skip():
+    """From a real response, previously scored SKIP by the prose parser."""
+    text = (
+        "**Overall: No hard disqualifiers found - this looks worth applying to.**\n"
+        "Work authorization: the posting does not state their policy; worth asking.\n"
+        "VERDICT: APPLY\nBLOCKERS: NONE"
+    )
+    p = parse_baseline_output(text, IDS)
+    assert p.verdict == "APPLY"
+    assert p.blockers == [], "a label discussed in the body is commentary, not a claim"
+
+
+def test_body_mentions_never_become_claims():
+    text = (
+        "I would check security_clearance and work_authorization with the recruiter.\n"
+        "VERDICT: APPLY\nBLOCKERS: NONE"
+    )
+    assert parse_baseline_output(text, IDS).blockers == []
 
 
 def test_blockers_carry_no_evidence():
@@ -86,20 +137,25 @@ def test_blockers_carry_no_evidence():
     baseline will score 100% missing and 0% hallucinated, which is an accurate
     description of a system that was not asked for citations.
     """
-    p = parse_baseline_output("Skip, work_authorization is the problem.", IDS)
+    p = parse_baseline_output("VERDICT: SKIP\nBLOCKERS: work_authorization", IDS)
     assert p.blockers[0].evidence == ""
 
 
 def test_unmentioned_blockers_are_never_inferred():
     """The parse layer extracts; it does not reason.
 
-    The posting here is plainly about sponsorship, but the model did not name
-    a label, so no blocker is claimed. Inferring one would be the harness
+    The posting here is plainly about sponsorship, but the model declared no
+    label, so no blocker is claimed. Inferring one would be the harness
     quietly playing the baseline's hand.
     """
     p = parse_baseline_output("Skip this — they won't sponsor a visa for you.", IDS)
     assert p.verdict == "SKIP"
     assert p.blockers == []
+
+
+def test_prose_fallback_still_works_when_the_format_is_ignored():
+    """Not every answer will comply; the fallback keeps those scoreable."""
+    assert parse_baseline_output("I would skip this one.", IDS).verdict == "SKIP"
 
 
 def test_a_verdict_with_no_labels_still_parses():

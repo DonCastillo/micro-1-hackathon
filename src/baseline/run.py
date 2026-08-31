@@ -49,12 +49,20 @@ Here is a job posting:
 
 Should I apply? If anything in this posting disqualifies me, tell me what.
 
-If you find anything disqualifying, name it using one of these labels:
+End your answer with two lines exactly:
+
+VERDICT: APPLY or SKIP
+BLOCKERS: comma-separated labels from the list below, or NONE
+
+The labels:
 {labels}
 """
 
-# Read off the model's prose. Ordered most specific first: "do not apply"
-# must win before the bare word "apply" is considered.
+_VERDICT_LINE = re.compile(r"^\s*\**verdict\**\s*[:\-]\s*\**\s*(apply|skip)\b", re.I | re.M)
+_BLOCKERS_LINE = re.compile(r"^\s*\**blockers?\**\s*[:\-]\s*(.+)$", re.I | re.M)
+
+# Fallback only, for answers that ignore the format. Ordered most specific
+# first: "do not apply" must win before the bare word "apply" is considered.
 _SKIP_PATTERNS = (
     r"\bdo not apply\b",
     r"\bdon'?t apply\b",
@@ -91,37 +99,55 @@ def parse_baseline_output(text: str, known_types: list[str]) -> Prediction:
     model named; it never infers a blocker the model did not mention, which
     would be the parse layer doing the baseline's work for it.
     """
-    lowered = text.lower()
+    # Prefer the declared lines. Scanning the whole answer misreads it badly:
+    # "No hard disqualifiers found" parsed as SKIP because a skip pattern
+    # matched under a negation, and "your 6 years of experience clears the 5+
+    # requirement" claimed a years_of_experience blocker from a sentence saying
+    # the requirement was *satisfied*.
+    verdict_match = _VERDICT_LINE.search(text)
+    blockers_match = _BLOCKERS_LINE.search(text)
 
-    # Earliest signal wins, rather than SKIP taking precedence outright.
-    # "Yes, apply - nothing here disqualifies you" contains a skip pattern
-    # ("disqualif") under a negation, and a skip-first rule read it backwards.
+    if verdict_match:
+        verdict = verdict_match.group(1).upper()
+    else:
+        verdict = _verdict_from_prose(text)
+
+    # Only the declared BLOCKERS line counts as a claim. A label discussed in
+    # the body ("worth verifying their sponsorship policy") is commentary, not
+    # a claim, and counting it would invent findings the model never made.
+    source = blockers_match.group(1) if blockers_match else ""
+    if re.search(r"\bnone\b", source, re.I):
+        source = ""
+
+    named = []
+    for blocker_id in known_types:
+        pattern = re.escape(blocker_id).replace("_", r"[\s_-]")
+        if re.search(rf"\b{pattern}\b", source, re.I):
+            named.append(Claim(blocker_id, ""))
+
+    return Prediction(verdict=verdict, blockers=named)
+
+
+def _verdict_from_prose(text: str) -> str:
+    """Used only when the answer ignored the requested format.
+
+    Earliest signal wins rather than SKIP taking precedence, so a negated
+    mention ("nothing here disqualifies you") does not flip the verdict.
+    """
+    lowered = text.lower()
     skip_at = min(
         (m.start() for p in _SKIP_PATTERNS if (m := re.search(p, lowered))), default=None
     )
     apply_at = min(
         (m.start() for p in _APPLY_PATTERNS if (m := re.search(p, lowered))), default=None
     )
-
     if skip_at is None and apply_at is None:
         raise ParseError("no verdict found in baseline output")
     if apply_at is None:
-        verdict = "SKIP"
-    elif skip_at is None:
-        verdict = "APPLY"
-    else:
-        verdict = "SKIP" if skip_at <= apply_at else "APPLY"
-
-    # A label counts as claimed only if the model wrote it. Underscores may
-    # appear as spaces or hyphens because models reformat ids into prose.
-    # (re.escape leaves underscores alone, so substitute on the raw id.)
-    named = []
-    for blocker_id in known_types:
-        pattern = re.escape(blocker_id).replace("_", r"[\s_-]")
-        if re.search(rf"\b{pattern}\b", lowered):
-            named.append(Claim(blocker_id, ""))
-
-    return Prediction(verdict=verdict, blockers=named)
+        return "SKIP"
+    if skip_at is None:
+        return "APPLY"
+    return "SKIP" if skip_at <= apply_at else "APPLY"
 
 
 def load_corpus(corpus: Path) -> list[tuple[str, str]]:

@@ -179,10 +179,10 @@ Held identical between the baseline and every agent variant:
 - The 24 postings, in the same order
 - Scoring code — one `src/eval/` harness scores everything
 
-The baseline receives the posting, the profile, and the bare list of 14 blocker ids —
-names only. It does **not** receive their descriptions, phrasings, blocking rules,
-per-category decomposition, a verification pass, a structured output schema, or any
-requirement to cite evidence. That is what makes it a baseline. Its reasoning is never
+The baseline receives the posting, the profile, the bare list of 14 blocker ids — names
+only — and an instruction to end with a `VERDICT:` line and a `BLOCKERS:` line. It does
+**not** receive their descriptions, phrasings, blocking rules, per-category decomposition,
+a verification pass, a JSON schema, or any requirement to cite evidence. That is what makes it a baseline. Its reasoning is never
 tuned to make its output easier to parse — only the parse layer adapts, never the prompt.
 
 The `claude-opus-5` spot-check is a **separate, labelled experiment** on the final
@@ -214,6 +214,34 @@ different numbers.
 
 **Effect on recorded numbers:** none. The amendment predates the first baseline run;
 no measurement existed when it was made.
+
+### 2026-08-31 — the baseline states its verdict on a declared line
+
+**Was:** the baseline answered in freeform prose and the parse layer read the verdict and
+blockers out of it.
+
+**Now:** the prompt asks for two closing lines — `VERDICT: APPLY or SKIP` and
+`BLOCKERS: <labels> or NONE`. The parser reads those, falling back to prose only when the
+format is ignored.
+
+**Why:** measured on the first three real responses, the prose parser was wrong on two of
+three, in both directions.
+
+- *"No hard disqualifiers found — this looks worth applying to"* was scored **SKIP**,
+  because a skip pattern matched inside "disqualifiers" under a negation.
+- *"your 6 years of experience clears the 5+ requirement"* was scored as a claimed
+  `years_of_experience` blocker — a sentence stating the requirement was **satisfied**.
+
+Those are defects in the harness, not in the baseline. Left in place, the reported
+baseline score would have measured regex quality, and "our agent beat the baseline" would
+have meant "our agent beat our own parser".
+
+This is still one prompt, one pass, with no taxonomy semantics, no decomposition, no
+verification, and no evidence requirement — it asks the baseline to say plainly what it
+already decided. It makes the baseline stronger and the reported improvement smaller.
+
+**Effect on recorded numbers:** none. The smoke run that exposed this was three postings
+and is not a recorded result; no full baseline had been measured.
 
 ### 2026-08-30 — the baseline is given the blocker id list
 
