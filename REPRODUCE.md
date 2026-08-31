@@ -39,10 +39,11 @@ Edit `.env` and set `ANTHROPIC_API_KEY`. Leave `MODEL_ID=claude-sonnet-5` and
 `EFFORT=medium` unchanged — the comparison is only fair if the baseline and the final
 system run under identical settings (`EVAL.md` §9).
 
-Load it into your shell. **Every command below assumes you have done this:**
+That is enough — every command below reads `.env` from the repository root on its own.
+To override a value for one run, export it first; the shell wins over the file:
 
 ```bash
-set -a; source .env; set +a
+set -a; source .env; set +a      # optional
 ```
 
 > **If you get `400 anthropic-workspace-id is required`:** your key is identity-linked

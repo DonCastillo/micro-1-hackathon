@@ -118,7 +118,6 @@ Full instructions, exact commands, versions, runtime and cost: [`REPRODUCE.md`](
 ```bash
 python3 -m venv .venv && .venv/bin/pip install -r requirements.txt
 cp .env.example .env                     # add your ANTHROPIC_API_KEY
-set -a; source .env; set +a
 
 .venv/bin/python -m src.injector.generate --seed 42 --out data/corpus   # free, deterministic
 .venv/bin/python -m src.agent.run --variant final --out results/mine

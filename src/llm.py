@@ -13,9 +13,35 @@ from __future__ import annotations
 
 import os
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Any
 
 import anthropic
+
+
+def _load_dotenv() -> None:
+    """Read .env into the environment if the shell hasn't already.
+
+    REPRODUCE.md asks for `set -a; source .env; set +a`, and forgetting it in a
+    fresh shell surfaced as a missing key several frames deep in a traceback.
+    It also silently unpinned MODEL_ID, which would break the "same model"
+    invariant this module exists to hold.
+
+    Existing values win, so an inline `MODEL_ID=... python -m ...` still
+    overrides the file.
+    """
+    path = Path(__file__).resolve().parent.parent / ".env"
+    if not path.exists():
+        return
+    for line in path.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        key, _, value = line.partition("=")
+        os.environ.setdefault(key.strip(), value.strip().strip("\"'"))
+
+
+_load_dotenv()
 
 # USD per million tokens. Verified against the pricing table on 2026-08-30.
 PRICING = {
@@ -87,7 +113,8 @@ class Response:
 def _client() -> anthropic.Anthropic:
     if not os.environ.get("ANTHROPIC_API_KEY"):
         raise RuntimeError(
-            "ANTHROPIC_API_KEY is not set. Run: set -a; source .env; set +a"
+            "ANTHROPIC_API_KEY is not set, and no .env at the repository root "
+            "supplied one. Copy .env.example to .env and add your key."
         )
 
     # An identity-linked key belongs to an organisation rather than to a single
