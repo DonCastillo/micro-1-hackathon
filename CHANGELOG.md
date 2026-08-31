@@ -9,6 +9,7 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 | Stage | What was tried and why | Evidence | Decision / learning |
 |---|---|---|---|
 | **Baseline** | One direct prompt, one pass, no help | **F1 0.789** (0.789–0.850 over 3 runs) | Verdicts already perfect; the failure is *attribution*, not detection |
+| **Iteration 1** | Taxonomy definitions instead of bare ids — the failures looked like a vocabulary problem | **F1 0.914** (+0.125) · precision 0.750 → 0.941 | **Kept.** Confusable-pair errors eliminated; remaining misses are all on multi-blocker postings |
 
 ---
 
@@ -109,3 +110,83 @@ distinguish ITAR citizenship from visa sponsorship when it has only been shown t
 names. Predicted effect: precision rises, recall roughly unchanged. If precision does not
 move, the confusion is not about vocabulary and the next iteration should target
 something else.
+
+
+---
+
+## Iteration 1 — taxonomy definitions in context
+
+**What and why.** The baseline was given the 14 blocker ids as bare names. Every one of its
+false positives was a confusion between two semantic neighbours, so the hypothesis was that
+this is a *vocabulary* problem: the model cannot separate ITAR citizenship from visa
+sponsorship when it has only been shown the labels' names. Iteration 1 adds each blocker's
+description and — the load-bearing part — **which profile field decides it**:
+
+```
+- work_authorization (legal): Role does not offer visa sponsorship.
+  Decided by the profile field `work_auth`.
+- citizenship_required (legal): Employment restricted to U.S. citizens or
+  ITAR-defined U.S. Persons. Decided by the profile field `citizenship`.
+```
+
+Nothing else changed. Same model, same effort, same corpus, same output format, same single
+pass, same parser. Structured output was deliberately *not* bundled in: the baseline already
+had 0% parse failures, so it had nothing to fix and would only have confounded the result.
+
+**Predicted before running:** precision rises, recall roughly flat. If precision did not
+move, the confusion was not about vocabulary and iteration 2 would have to target something
+else.
+
+**Evidence.** One run (EVAL.md §8 — intermediate iterations get a single run), $0.12.
+
+| Metric | Baseline (median of 3) | Iteration 1 | Change |
+|---|---|---|---|
+| **Detection F1** | 0.789 | **0.914** | **+0.125** |
+| Precision | 0.750 | 0.941 | +0.191 |
+| Recall | 0.833 | 0.889 | +0.056 |
+| False positives | 5 | 1 | −4 |
+| Decision accuracy | 100% | 100% | — |
+| Cost per task | $0.0049 | $0.0050 | +$0.0001 |
+
+**The gain clears the noise floor.** The baseline's own F1 varies by 0.061 across three
+identical runs; this gain is 0.125, roughly double that. Under EVAL.md §8 it is reportable.
+The caveat is stated rather than buried: iteration 1 is a single run compared against a
+three-run baseline median, so the *size* of the gain is less certain than its direction.
+
+**The predicted mechanism is visible in the errors, not just the totals.** The confusable
+pair that caused every baseline false positive is gone:
+
+| False positives by type | run 1 | run 2 | run 3 | Iteration 1 |
+|---|---|---|---|---|
+| `work_authorization` | 3 | 3 | 3 | **0** |
+| `relocation_required` | 2 | 2 | 2 | **1** |
+
+Nine spurious `work_authorization` claims across three baseline runs, zero here. That
+consistency is what makes this a confirmed mechanism rather than a lucky run.
+
+**What is left, and it is a different failure.** Both remaining misses are on
+multi-blocker postings, and in both the model found one blocker and stopped:
+
+```
+jd_04  gold: employment_type + citizenship_required   claimed: citizenship_required
+jd_16  gold: citizenship_required + professional_licensure   claimed: citizenship_required
+```
+
+`jd_16` is still an improvement — the baseline found *neither* of its blockers and invented
+a third; iteration 1 finds one of two and invents nothing. But the shape of the error has
+changed from *wrong answer* to *incomplete answer*.
+
+**An unplanned observation on cost.** Input tokens rose from 20.7K to 35.4K (the definitions
+block), but output fell from 8.0K to 4.8K, so cost per task was flat at $0.005. More context
+made the model more decisive rather than more verbose. Worth remembering before assuming a
+richer prompt costs more.
+
+**Decision — kept.** The hypothesis held, the mechanism is visible, and the gain exceeds the
+noise floor.
+
+**Next.** Iteration 2 tests the new failure: a single pass appears to anchor on the first
+blocker it finds and stop looking. Checking each taxonomy group independently and merging
+the results should recover the second blocker on multi-blocker postings. Predicted effect:
+recall rises on the `multi` bucket specifically, precision roughly flat. `professional_licensure`
+in its footer phrasing has now been missed in all four runs, and remains a suspected corpus
+defect rather than a system failure — see the step 2.6 audit note.
