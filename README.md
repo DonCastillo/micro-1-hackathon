@@ -71,15 +71,42 @@ That is the whole system. Four more elaborate designs were built, measured, and 
 per-group decomposition and two verification passes — each with its own changelog entry
 explaining what it cost and what it taught. See [`CHANGELOG.md`](CHANGELOG.md).
 
-Sample output:
+### Using it
+
+```bash
+python -m src.check posting.txt              # one posting
+python -m src.check inbox/*.md               # a batch, with a summary
+```
 
 ```
-jd_11 — SKIP
-  onsite_location
-  > Candidates must reside within commuting distance of our Austin, TX office.
+ SKIP    Machine Learning Engineer
+         Remote (United States)
 
-jd_13 — APPLY
-  No disqualifying conditions found.
+  ✗  Onsite location
+     "Candidates must reside within commuting distance of our Austin, TX office."
+     You're in Los Angeles and not open to relocating.
+
+  14 conditions checked · 1 blocker · 3.2s · $0.0049
+```
+
+Three things are on screen deliberately. **The posting's own sentence**, so the verdict is
+checkable without reopening the posting. **The line from your profile it collides with**,
+generated from your profile rather than by the model — it cannot hallucinate, and it
+supplies the half of the comparison the quote does not. **What was checked and what it
+cost**, so an `APPLY` is a statement rather than a shrug.
+
+A batch ends with the thing you actually wanted:
+
+```
+  Summary
+  ────────────────────────────────────────────────────────────
+  APPLY  Data Engineer
+  SKIP   Integrations Engineer                        years of experience
+  SKIP   Application Security Engineer                citizenship required
+  SKIP   Data Engineer                                citizenship required, employment type
+  APPLY  Developer Experience Engineer
+
+  2 of 5 worth applying to · 17s · $0.0239
 ```
 
 ---
@@ -228,6 +255,32 @@ you actually care about.
 variant is ever shown the exact sentences planted in the corpus, and
 `tests/test_eval_run.py` scores three deliberately broken systems to prove the harness can
 tell good from bad.
+
+## Known limitations
+
+**One blocker type is never caught.** `professional_licensure` in its footer phrasing —
+*"Licensure will be verified with the state board prior to an offer being extended"* — states
+no requirement, only that one will be checked. Missed by every variant in every run. Flagged
+as a suspected corpus defect during the step 2.6 audit, before any system was measured
+against it, and reported as an open question rather than fixed.
+
+**Roughly one claim in eighteen is mislabelled.** Precision is 0.944, not 1.000. In practice
+this looks like the right posting being flagged under a neighbouring condition — during
+manual testing one run reported `work_authorization` while quoting a sentence about
+commuting distance. Three subsequent runs on the same posting were correct.
+
+The output is designed so this is *visible* rather than silent: the quote sits beside the
+label, so a mismatch is apparent to the reader. That is the mitigation, and it is a weaker
+one than fixing the underlying error would be.
+
+**The corpus is synthetic and the profile is one person.** These numbers describe 24
+generated postings checked against one invented candidate. Real postings are longer, messier,
+and more repetitive; a different profile changes which conditions are even reachable.
+Nothing here has been measured on a real job board.
+
+**Verification was removed, so nothing catches a plausible-but-wrong claim.** Two attempts
+are documented in the changelog. Both reached perfect precision by also rejecting real
+blockers, and neither recovered the decision accuracy the single pass already had.
 
 ## Ground rules
 
