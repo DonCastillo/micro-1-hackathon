@@ -16,7 +16,7 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 | **Iteration 3s + grounding** | Drop any claim whose quote is not in the posting — mechanical, no API call | **F1 0.919** · precision 0.850 → 0.895 · hallucination → 0% | **Kept.** Free, deterministic, no regressions |
 | **Iteration 4** | Ask the model whether each quote states its condition; reject-only | **F1 0.909** · precision **1.000** · recall 0.944 → **0.833** · decision accuracy 100% → **91.7%** | **Half kept.** Perfect precision bought by rejecting two real blockers — the verifier could not see the profile, so it could not judge relational conditions |
 | **Iteration 5** | Give the verifier the profile field its condition is decided by | **F1 0.914** · recall 0.833 → 0.889 · decision accuracy 91.7% → **95.8%** | **Removed.** Partial recovery only, and still worse than no verifier at all on the user-facing metric |
-| **Final** | Definitions + verbatim evidence + mechanical grounding, one call | **F1 0.919** · recall 0.944 · evidence 100% · decision accuracy **100%** · **$0.0044/task** | The configuration that survives |
+| **Final** | Definitions + verbatim evidence + mechanical grounding, one call | **F1 0.944** (median of 3) · recall 0.944 · evidence 100% · decision accuracy **100%** · **$0.0045/task** | The configuration that survives |
 
 ---
 
@@ -499,17 +499,35 @@ One call per posting: taxonomy definitions naming the deciding profile field, a 
 quote required for every claim, and a mechanical grounding check that drops any quote not
 present in the posting.
 
-| Metric | Baseline (median of 3) | **Final** | Change |
+One call per posting. Three runs each for the baseline and the final system, per
+`EVAL.md` §8; medians reported with the spread.
+
+| Metric | Baseline (median of 3) | **Final (median of 3)** | Change |
 |---|---|---|---|
-| **Detection F1** | 0.789 | **0.919** | **+0.130** |
+| **Detection F1** | 0.789 | **0.944** | **+0.155** |
 | Recall | 0.833 | 0.944 | +0.111 |
-| Precision | 0.750 | 0.895 | +0.145 |
+| Precision | 0.750 | 0.944 | +0.194 |
 | Evidence-correct rate | 0% | **100%** | +100pp |
 | Hallucinated quotes | n/a | 0% | — |
 | Decision accuracy | 100% | 100% | — |
 | Clean-posting false alarms | 0/8 | 0/8 | — |
-| **Cost per task** | $0.0049 | **$0.0044** | **−10%** |
+| **Cost per task** | $0.0051 | **$0.0045** | **−12%** |
 
-The improvement is +0.130 F1 against a 0.061 noise floor, and it costs less per posting than
-the baseline did — the evidence requirement makes the model answer in JSON instead of prose,
-and the shorter output more than pays for the longer prompt.
+### Run-to-run variation
+
+| | Run 1 | Run 2 | Run 3 | Median | Spread |
+|---|---|---|---|---|---|
+| Baseline F1 | 0.789 | 0.850 | 0.789 | 0.789 | 0.061 |
+| **Final F1** | 0.919 | 0.971 | 0.944 | **0.944** | 0.053 |
+
+**The distributions do not overlap.** The worst final run (0.919) scores above the best
+baseline run (0.850). That is a stronger claim than comparing medians: the result does not
+depend on which run of each was picked, so the +0.155 gain cannot be an artefact of a lucky
+draw. It is also 2.5× the 0.061 noise floor `EVAL.md` §8 requires it to clear.
+
+Recall was identical in all three final runs (0.944, spread 0.000), as were evidence
+coverage, decision accuracy and cost. All the remaining variation is in precision (0.895 to
+1.000) — one borderline false positive appearing or not.
+
+**It costs less than the baseline.** Requiring evidence makes the model answer in JSON
+rather than prose, and the shorter output more than pays for the longer prompt.
