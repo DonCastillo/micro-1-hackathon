@@ -15,6 +15,8 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 | **Iteration 3s** | The same evidence requirement with decomposition **removed** — the isolation test | **F1 0.895** · recall 0.944 · evidence 100% · **$0.0042/task, the cheapest variant** | **Kept.** Evidence was doing all the work; decomposition was contributing nothing but cost |
 | **Iteration 3s + grounding** | Drop any claim whose quote is not in the posting — mechanical, no API call | **F1 0.919** · precision 0.850 → 0.895 · hallucination → 0% | **Kept.** Free, deterministic, no regressions |
 | **Iteration 4** | Ask the model whether each quote states its condition; reject-only | **F1 0.909** · precision **1.000** · recall 0.944 → **0.833** · decision accuracy 100% → **91.7%** | **Half kept.** Perfect precision bought by rejecting two real blockers — the verifier could not see the profile, so it could not judge relational conditions |
+| **Iteration 5** | Give the verifier the profile field its condition is decided by | **F1 0.914** · recall 0.833 → 0.889 · decision accuracy 91.7% → **95.8%** | **Removed.** Partial recovery only, and still worse than no verifier at all on the user-facing metric |
+| **Final** | Definitions + verbatim evidence + mechanical grounding, one call | **F1 0.919** · recall 0.944 · evidence 100% · decision accuracy **100%** · **$0.0044/task** | The configuration that survives |
 
 ---
 
@@ -425,3 +427,89 @@ reject-only, still blind to the rest of the posting.
 
 **Current best configuration: iteration 3s + grounding.** F1 0.919, recall 0.944, precision
 0.895, evidence 100%, decision accuracy 100%, $0.0042 per task — cheaper than the baseline.
+
+
+---
+
+## Iteration 5 — a profile-aware verifier, and the removal of verification
+
+**What and why.** Iteration 4's verifier rejected two real blockers because it was asked to
+judge relational conditions from one side of the relation. Every blocker already declares
+the profile field that decides it, so iteration 5 shows the verifier that one field and asks
+the comparison directly. It stays blind to the rest of the posting.
+
+**Pre-registered criterion:** *"If recall does not recover, the over-rejection was not about
+missing data and the verifier should be removed rather than tuned again."*
+
+**Evidence.**
+
+| | iter3s + grounding | Iteration 4 | Iteration 5 |
+|---|---|---|---|
+| **Detection F1** | **0.919** | 0.909 | 0.914 |
+| Recall | **0.944** | 0.833 | 0.889 |
+| Precision | 0.895 | **1.000** | 0.941 |
+| **Decision accuracy** | **100%** | 91.7% | 95.8% |
+| Cost per task | **$0.0042** | $0.0047 | $0.0050 |
+
+The missing data was part of the problem — `jd_15`'s salary blocker came back once the
+verifier could see `comp_floor: 140000`. It was not all of it. Recall recovered to 0.889,
+not 0.944, and decision accuracy stayed below the 100% the single pass had held in every
+run since the baseline. **The criterion was met: removed.**
+
+**The surviving wrong rejection is the most interesting result in the project**, because the
+verifier was arguably right and my data was wrong.
+
+```
+Condition shown:  security_clearance — "An active government security clearance
+                  is required at time of application."
+Quote shown:      "This one requires an active Secret clearance before your start date."
+Background:       clearance: none
+Verifier:         REJECT
+```
+
+Read literally, that is defensible. A clearance required *before your start date* is not a
+clearance required *at time of application* — someone without one could still be eligible.
+The verifier spotted a mismatch between `data/taxonomy.yaml`'s description and its own
+phrasings, which say "prior to their start date" in the footer variant and "before your
+start date" in the scoped-negation variant. The `blocks_when` rule treats any clearance
+requirement as disqualifying; the description I handed the verifier is narrower than the
+rule it is meant to describe.
+
+**This is a corpus defect, found by the system under test.** It is recorded rather than
+quietly patched: fixing the description now would change the corpus after four variants had
+been measured against it, and the honest report is that one of the 18 blockers is described
+inconsistently — alongside `professional_licensure`'s vague footer phrasing, which has now
+been missed by every variant in every run.
+
+**What removing verification actually taught us.** A verifier is another model call, and it
+inherits the failure modes of the thing it is verifying — while seeing *less* context. The
+detector handled `jd_18`'s scoped negation correctly; the verifier, shown a narrower slice,
+did not. Adding a checking stage does not add a different kind of judgement, it adds the
+same judgement with less information.
+
+The one filter kept is the one that cannot be wrong about meaning: **a sentence is either in
+the posting or it is not.** That check is mechanical, free, deterministic, and it removed
+every fabricated citation without ever touching a real one.
+
+---
+
+## Final configuration
+
+One call per posting: taxonomy definitions naming the deciding profile field, a verbatim
+quote required for every claim, and a mechanical grounding check that drops any quote not
+present in the posting.
+
+| Metric | Baseline (median of 3) | **Final** | Change |
+|---|---|---|---|
+| **Detection F1** | 0.789 | **0.919** | **+0.130** |
+| Recall | 0.833 | 0.944 | +0.111 |
+| Precision | 0.750 | 0.895 | +0.145 |
+| Evidence-correct rate | 0% | **100%** | +100pp |
+| Hallucinated quotes | n/a | 0% | — |
+| Decision accuracy | 100% | 100% | — |
+| Clean-posting false alarms | 0/8 | 0/8 | — |
+| **Cost per task** | $0.0049 | **$0.0044** | **−10%** |
+
+The improvement is +0.130 F1 against a 0.061 noise floor, and it costs less per posting than
+the baseline did — the evidence requirement makes the model answer in JSON instead of prose,
+and the shorter output more than pays for the longer prompt.

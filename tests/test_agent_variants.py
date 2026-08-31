@@ -370,3 +370,42 @@ def test_verifier_is_not_shown_the_posting():
     verify = next(s for s in traj.steps if s.name.startswith("verify_"))
     assert "## Requirements" not in verify.user
     assert "5+ years" not in verify.user
+
+
+# ─── iteration 5: profile-aware verification ──────────────────────────────
+
+def test_iteration5_shows_the_verifier_the_deciding_profile_field():
+    """The fix for iteration 4 is data, not a better instruction."""
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "We are unable to provide visa sponsorship for this position."}]}',
+        "KEEP",
+    ])
+    VARIANTS["iter5"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    verify = next(s for s in traj.steps if s.name.startswith("verify_"))
+    assert "work_auth" in verify.user
+    assert "requires_sponsorship" in verify.user
+
+
+def test_iteration5_verifier_still_cannot_see_the_posting():
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "We are unable to provide visa sponsorship for this position."}]}',
+        "KEEP",
+    ])
+    VARIANTS["iter5"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    verify = next(s for s in traj.steps if s.name.startswith("verify_"))
+    assert "## Requirements" not in verify.user and "5+ years" not in verify.user
+
+
+def test_iteration5_sends_only_the_one_relevant_field():
+    """The whole profile would let it re-derive the claim from scratch."""
+    traj = _traj_recording([
+        '{"blockers": [{"type": "work_authorization", '
+        '"evidence": "We are unable to provide visa sponsorship for this position."}]}',
+        "KEEP",
+    ])
+    VARIANTS["iter5"].predict(POSTING, PROFILE, TAXONOMY, traj)
+    verify = next(s for s in traj.steps if s.name.startswith("verify_"))
+    assert "comp_floor" not in verify.user
+    assert "years_experience" not in verify.user

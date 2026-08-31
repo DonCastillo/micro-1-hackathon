@@ -427,10 +427,161 @@ class Iteration4:
         return Prediction(verdict="SKIP" if kept else "APPLY", blockers=kept)
 
 
+VERIFY_WITH_PROFILE_PROMPT = """\
+A job posting was checked against someone's background, and one condition was
+reported as disqualifying them. A sentence from the posting was quoted as proof.
+
+Condition: {blocker_id} — {description}
+
+The part of their background this condition is decided by:
+
+{profile_fragment}
+
+Quoted sentence from the posting: "{evidence}"
+
+Given that background, does this sentence disqualify them? Judge only this
+sentence against this background detail. Do not consider anything else the
+posting might say, and do not consider whether the condition is plausible for
+this kind of role.
+
+Answer with one word: KEEP if it disqualifies them, REJECT if it does not.
+"""
+
+
+class Iteration5:
+    """Iteration 4's verifier, given the side of the comparison it was missing.
+
+    Iteration 4 reached precision 1.000 and rejected two real blockers, both
+    relational conditions:
+
+        compensation_floor  "The salary range is $85,000 - $120,000 annually."
+                            States a band. Whether the band is too low depends
+                            on a number the verifier was never shown.
+        security_clearance  "...requires an active Secret clearance before your
+                            start date." Judged against a condition worded "at
+                            time of application", close enough to reject.
+
+    The fix is not a better instruction, it is the missing data: every blocker
+    already declares the profile field that decides it, so the verifier is now
+    shown that one field and asked the comparison directly. It stays blind to
+    the rest of the posting, which is what stopped it re-deriving the claim it
+    is meant to be checking.
+
+    Predicted: precision holds near 1.000, recall returns to 0.944, decision
+    accuracy back to 100%. If recall does not recover, the over-rejection was
+    not about missing data and the verifier should be removed rather than
+    tuned again.
+    """
+
+    name = "iter5"
+    description = "iter3s + grounding + profile-aware reject-only verification"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        prompt = ITER3S_PROMPT.format(
+            profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+            posting=posting.strip(),
+            definitions=blocker_definitions(taxonomy),
+        )
+        response = traj.call("detect", BASELINE_SYSTEM, prompt)
+
+        by_id = {b["id"]: b for b in taxonomy["blockers"]}
+        candidates = [c for c in parse_claims_json(response.text) if c.type in by_id]
+
+        kept: list[Claim] = []
+        for claim in candidates:
+            if not claim.evidence or not locate(posting, claim.evidence):
+                traj.note(
+                    "reject_ungrounded",
+                    f"{claim.type}: quoted text is not in the posting — "
+                    f"{claim.evidence[:80]!r}",
+                )
+                continue
+
+            blocker = by_id[claim.type]
+            field = blocker["profile_field"]
+            fragment = yaml.safe_dump({field: profile[field]}, sort_keys=False).strip()
+
+            verdict = traj.call(
+                f"verify_{claim.type}",
+                BASELINE_SYSTEM,
+                VERIFY_WITH_PROFILE_PROMPT.format(
+                    blocker_id=claim.type,
+                    description=blocker["description"],
+                    profile_fragment=fragment,
+                    evidence=claim.evidence,
+                ),
+            )
+            if "REJECT" in verdict.text.upper():
+                traj.note(
+                    "reject_irrelevant",
+                    f"{claim.type}: quoted sentence does not disqualify given {field}",
+                )
+                continue
+            kept.append(claim)
+
+        return Prediction(verdict="SKIP" if kept else "APPLY", blockers=kept)
+
+
+class Final:
+    """Everything that survived: definitions, evidence, grounding. One call.
+
+    What is here and why:
+      - taxonomy definitions naming the deciding profile field (iteration 1)
+      - a verbatim quote required for every claim (iteration 3)
+      - a mechanical grounding check that drops any quote not in the posting
+
+    What was removed, each with its own changelog entry:
+      - per-group decomposition (iteration 2): its recall gain turned out to
+        come from asking for a complete list, which one call does for a
+        quarter of the cost
+      - model verification (iterations 4 and 5): reached precision 1.000 by
+        also rejecting real blockers, and never recovered decision accuracy
+        to the 100% the single pass already had
+
+    The grounding check is the only filter left because it is the only one
+    that cannot be wrong about meaning: a sentence is either in the posting or
+    it is not.
+    """
+
+    name = "final"
+    description = "definitions + verbatim evidence + mechanical grounding check"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        prompt = ITER3S_PROMPT.format(
+            profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+            posting=posting.strip(),
+            definitions=blocker_definitions(taxonomy),
+        )
+        response = traj.call("detect", BASELINE_SYSTEM, prompt)
+
+        allowed = {b["id"] for b in taxonomy["blockers"]}
+        kept: list[Claim] = []
+        for claim in parse_claims_json(response.text):
+            if claim.type not in allowed:
+                traj.note("reject_unknown_type", f"{claim.type!r} is not in the taxonomy")
+                continue
+            if not claim.evidence or not locate(posting, claim.evidence):
+                traj.note(
+                    "reject_ungrounded",
+                    f"{claim.type}: quoted text is not in the posting — "
+                    f"{claim.evidence[:80]!r}",
+                )
+                continue
+            kept.append(claim)
+
+        return Prediction(verdict="SKIP" if kept else "APPLY", blockers=kept)
+
+
 VARIANTS: dict[str, Variant] = {
     "iter1": Iteration1(),
     "iter2": Iteration2(),
     "iter3": Iteration3(),
     "iter3s": Iteration3Single(),
     "iter4": Iteration4(),
+    "iter5": Iteration5(),
+    "final": Final(),
 }
