@@ -10,7 +10,9 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 |---|---|---|---|
 | **Baseline** | One direct prompt, one pass, no help | **F1 0.789** (0.789–0.850 over 3 runs) | Verdicts already perfect; the failure is *attribution*, not detection |
 | **Iteration 1** | Taxonomy definitions instead of bare ids — the failures looked like a vocabulary problem | **F1 0.914** (+0.125) · precision 0.750 → 0.941 | **Kept.** Confusable-pair errors eliminated; remaining misses are all on multi-blocker postings |
-| **Iteration 2** | Four independent per-group checks, merged — iteration 1 found one blocker and stopped | **F1 0.850** (−0.064) · recall 0.889 → 0.944, precision 0.941 → 0.773 | **Not kept on its own.** Hypothesis confirmed *and* the change lost: narrowing the question removed the cross-group competition that suppressed marginal claims |
+| **Iteration 2** | Four independent per-group checks, merged — iteration 1 found one blocker and stopped | **F1 0.850** (−0.064) · recall 0.889 → 0.944, precision 0.941 → 0.773 | **Removed.** Hypothesis confirmed *and* the change lost: narrowing the question removed the cross-group competition that suppressed marginal claims |
+| **Iteration 3** | Every claim must quote the posting verbatim (on top of decomposition) | **F1 0.865** · evidence-correct **0% → 100%** | Precision partly recovered, but still short of iteration 1 at 2× the cost |
+| **Iteration 3s** | The same evidence requirement with decomposition **removed** — the isolation test | **F1 0.895** · recall 0.944 · evidence 100% · **$0.0042/task, the cheapest variant** | **Kept.** Evidence was doing all the work; decomposition was contributing nothing but cost |
 
 ---
 
@@ -257,3 +259,81 @@ Either outcome is reportable, and the removal case is written up rather than del
 
 **Cost note.** 2.5× the cost of iteration 1 for a worse score. If iteration 3 does not
 recover the precision, this is a straightforward removal on both axes.
+
+
+---
+
+## Iteration 3 — verbatim evidence, and the removal of decomposition
+
+**What and why.** Iteration 2's new false positives were all claims with nothing in the
+posting to support them. Requiring a verbatim quote for every claim should make an
+unsupportable claim harder to make: the model has to produce the sentence before it can
+report the finding.
+
+The output format changes to JSON here. That is a second change bundled into one iteration,
+and it is forced rather than chosen — a quoted sentence does not fit on a comma-separated
+line. Saying so is better than claiming a clean single-variable test.
+
+**Predicted:** precision recovers toward iteration 1's 0.941 while keeping iteration 2's
+recall; evidence-correct rises from 0% for the first time.
+
+### Then the isolation test
+
+Iteration 3 scored F1 0.865 against iteration 1's 0.914 — a 0.049 gap, *below* the 0.061
+noise floor, so the two are indistinguishable on detection while iteration 3 costs twice as
+much. That left an obvious question the changelog had already committed to answering: is
+decomposition contributing anything, or is the evidence requirement doing all the work?
+
+**Iteration 3s** answers it: the identical evidence requirement, one call, no decomposition.
+
+| Variant | F1 | Recall | Precision | Evidence correct | Cost/task |
+|---|---|---|---|---|---|
+| Baseline | 0.789 | 0.833 | 0.750 | 0% | $0.0051 |
+| Iteration 1 | **0.914** | 0.889 | **0.941** | 0% | $0.0050 |
+| Iteration 2 | 0.850 | 0.944 | 0.773 | 0% | $0.0124 |
+| Iteration 3 | 0.865 | 0.889 | 0.842 | **100%** | $0.0104 |
+| **Iteration 3s** | 0.895 | **0.944** | 0.850 | **100%** | **$0.0042** |
+
+**Decomposition is removed.** Iteration 3s beats iteration 3 on F1, matches it on evidence,
+and costs 40% of it. Against iteration 1 the F1 gap is 0.019 — far inside the noise floor,
+so detection is a wash — while evidence goes from 0% to 100% and cost *falls*. Four calls
+per posting bought nothing that one call did not.
+
+**What decomposition actually taught us.** It was not useless, it was mis-attributed. It
+raised recall (0.889 → 0.944) and that gain survived into iteration 3s — which reaches the
+same 0.944 with a single call. So the recall was never coming from splitting the question;
+it was coming from *asking for a complete list* rather than an answer. Iteration 2's four
+narrow prompts happened to do that, and its cost and precision loss were the price of a
+side effect that could be had for free.
+
+**The finding that matters most, and it is a negative one.** Requiring evidence did **not**
+suppress unsupportable claims. All three remaining false positives are `work_authorization`
+on postings that never mention sponsorship at all — the model reasons that silence about
+sponsorship is itself a blocker. Asked for a quote, it supplied one anyway:
+
+| Posting | Cited as proof of "no sponsorship" | Actually |
+|---|---|---|
+| `jd_12` | *"Role does not offer visa sponsorship."* | **not in the posting** — it echoed back the definition I gave it |
+| `jd_14` | the equal-opportunity boilerplate | real sentence, unrelated |
+| `jd_19` | *"4+ years in applied machine learning"* | real sentence, unrelated |
+
+**A model asked for evidence will produce evidence-shaped text.** Requiring a citation is
+not the same as requiring the citation to support the claim, and the hallucination rate
+(5%) only caught the one case where the fabrication was detectable by string search. The
+other two passed every automated check while proving nothing.
+
+This is why the metric was split into *found* and *correct* — and it shows the split is
+still not enough, because "found" only asks whether the sentence exists, not whether it
+says what the claim needs it to say.
+
+**Decision — iteration 3s kept, decomposition removed.** Iteration 2 and iteration 3 are
+retained in `src/agent/variants.py` and in this changelog rather than deleted; the
+comparison is the evidence for the removal.
+
+**Next.** Iteration 4 adds the verification pass: a second call that sees each claim beside
+its quote and may only *reject*, never add. It targets exactly the three surviving false
+positives, all of which fail the question "does this sentence state this condition?".
+Predicted: precision rises toward 1.0, recall unchanged, hallucination to 0%. If the
+`jd_14` and `jd_19` claims survive verification, then quoting an unrelated real sentence is
+enough to pass a checker too, and the next move is to make the verifier compare the quote
+against the *condition* rather than against the posting.

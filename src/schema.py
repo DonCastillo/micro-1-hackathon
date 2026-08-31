@@ -153,6 +153,22 @@ def _normalize_verdict(value: Any) -> str:
     raise ParseError(f"unrecognized verdict {value!r}")
 
 
+def parse_claims_json(raw: str) -> list[Claim]:
+    """Pull a `blockers` list out of a partial JSON reply.
+
+    Used by variants whose individual steps report findings without a verdict —
+    no single group check sees enough of the posting to decide one.
+    """
+    for candidate in _candidate_objects(raw):
+        try:
+            payload = json.loads(candidate)
+        except (json.JSONDecodeError, ValueError):
+            continue
+        if isinstance(payload, dict) and "blockers" in payload:
+            return _claims(payload["blockers"])
+    return []
+
+
 def parse_prediction(raw: str | dict[str, Any]) -> Prediction:
     """Recover a Prediction from model output. Raises ParseError if impossible."""
     if isinstance(raw, dict):

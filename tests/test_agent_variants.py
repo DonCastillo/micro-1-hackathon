@@ -216,3 +216,70 @@ def test_iteration2_returns_apply_when_no_group_finds_anything():
 
     p = VARIANTS["iter2"].predict("# Role\n", PROFILE, TAXONOMY, _Fake(posting_id="jd_test"))
     assert p.verdict == "APPLY" and p.blockers == []
+
+
+# ─── iteration 3: evidence ────────────────────────────────────────────────
+
+def _fake_traj(replies):
+    from src.trajectory import Trajectory
+
+    it = iter(replies)
+
+    class _Fake(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            class _R:
+                text = next(it)
+
+            return _R()
+
+    return _Fake(posting_id="jd_test")
+
+
+def test_iteration3_carries_evidence_through():
+    p = VARIANTS["iter3"].predict(
+        "# Role\n", PROFILE, TAXONOMY,
+        _fake_traj([
+            '{"blockers": [{"type": "citizenship_required", "evidence": "U.S. Persons only."}]}',
+            '{"blockers": []}', '{"blockers": []}', '{"blockers": []}',
+        ]),
+    )
+    assert p.verdict == "SKIP"
+    assert p.blockers[0].evidence == "U.S. Persons only."
+
+
+def test_iteration3_rejects_a_claim_from_the_wrong_group():
+    """A logistics check may not report a legal blocker.
+
+    Without this, decomposition collapses: one over-eager group could claim
+    everything and the split would stop meaning anything.
+    """
+    p = VARIANTS["iter3"].predict(
+        "# Role\n", PROFILE, TAXONOMY,
+        _fake_traj([
+            '{"blockers": []}',
+            '{"blockers": [{"type": "citizenship_required", "evidence": "x"}]}',
+            '{"blockers": []}', '{"blockers": []}',
+        ]),
+    )
+    assert p.blockers == [], "a legal claim from the logistics check must be dropped"
+
+
+def test_iteration3_survives_unparseable_group_output():
+    """One bad group reply must not lose the other three."""
+    p = VARIANTS["iter3"].predict(
+        "# Role\n", PROFILE, TAXONOMY,
+        _fake_traj([
+            "I could not determine this.",
+            '{"blockers": [{"type": "onsite_location", "evidence": "Austin office."}]}',
+            '{"blockers": []}', '{"blockers": []}',
+        ]),
+    )
+    assert [c.type for c in p.blockers] == ["onsite_location"]
+
+
+def test_iteration3_asks_for_verbatim_quotes():
+    from src.agent.variants import ITER3_GROUP_PROMPT
+
+    assert "exactly as it appears" in ITER3_GROUP_PROMPT
+    assert "do not paraphrase" in ITER3_GROUP_PROMPT.lower()
+    assert "if you cannot find a sentence" in ITER3_GROUP_PROMPT.lower()

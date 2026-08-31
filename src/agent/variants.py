@@ -20,7 +20,7 @@ import yaml
 
 from src.baseline.run import SYSTEM as BASELINE_SYSTEM
 from src.baseline.run import extract_declared_blockers, parse_baseline_output
-from src.schema import Prediction
+from src.schema import Claim, Prediction, parse_claims_json
 from src.trajectory import Trajectory
 
 
@@ -186,7 +186,159 @@ class Iteration2:
         return Prediction(verdict="SKIP" if found else "APPLY", blockers=found)
 
 
+ITER3_GROUP_PROMPT = """\
+Here is my background:
+
+{profile}
+
+Here is a job posting:
+
+{posting}
+
+Check this posting for {group} disqualifiers only. Ignore every other kind of
+problem — other checks cover those.
+
+The {group} conditions, and which part of my background decides each one:
+
+{definitions}
+
+A condition only disqualifies me if the posting makes it a firm requirement and
+my background fails it. A preference is not a requirement.
+
+For every disqualifier you report, quote the sentence from the posting that
+states it. Copy that sentence exactly as it appears — do not paraphrase,
+shorten, or join two sentences together. If you cannot find a sentence that
+states the condition, do not report it.
+
+Reply with only this JSON object and nothing else:
+
+{{"blockers": [{{"type": "<id from the list above>", "evidence": "<exact sentence from the posting>"}}]}}
+
+Use an empty list if nothing in this group disqualifies me.
+"""
+
+
+class Iteration3:
+    """Decomposition, plus every claim must quote the posting.
+
+    Hypothesis, from iteration 2's regression: its four new false positives
+    were all claims with nothing in the posting to support them — there is no
+    sentence in jd_03 denying sponsorship, because the bar there is ITAR
+    citizenship. Requiring a verbatim quote should make an unsupportable claim
+    harder to make, because the model has to produce the sentence before it can
+    report the finding.
+
+    Predicted: precision recovers toward iteration 1's 0.941 while keeping
+    iteration 2's recall; evidence-correct rate rises from 0% to something
+    meaningful for the first time.
+
+    The output format changes to JSON here, which is a second change bundled
+    into one iteration. It is forced rather than chosen: a quoted sentence does
+    not fit on a comma-separated line. The changelog says so rather than
+    claiming a clean single-variable test.
+    """
+
+    name = "iter3"
+    description = "decomposition + verbatim evidence required for every claim"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        profile_text = yaml.safe_dump(profile, sort_keys=False).strip()
+        found: list[Claim] = []
+        seen: set[str] = set()
+
+        for group in taxonomy["groups"]:
+            members = [b for b in taxonomy["blockers"] if b["group"] == group]
+            allowed = {b["id"] for b in members}
+            prompt = ITER3_GROUP_PROMPT.format(
+                profile=profile_text,
+                posting=posting.strip(),
+                group=group,
+                definitions=blocker_definitions({"blockers": members}),
+            )
+            response = traj.call(f"check_{group}", BASELINE_SYSTEM, prompt)
+
+            for claim in parse_claims_json(response.text):
+                if claim.type in allowed and claim.type not in seen:
+                    seen.add(claim.type)
+                    found.append(claim)
+
+        traj.note(
+            "merge",
+            f"merged {len(taxonomy['groups'])} group checks -> "
+            f"{sorted(seen) if seen else 'no blockers'}",
+        )
+        return Prediction(verdict="SKIP" if found else "APPLY", blockers=found)
+
+
+ITER3S_PROMPT = """\
+Here is my background:
+
+{profile}
+
+Here is a job posting:
+
+{posting}
+
+Should I apply? Report every condition in this posting that disqualifies me.
+
+These are the disqualifying conditions, what each one means, and which part of
+my background decides it:
+
+{definitions}
+
+A condition only disqualifies me if the posting makes it a firm requirement and
+my background fails it. A preference is not a requirement.
+
+For every disqualifier you report, quote the sentence from the posting that
+states it. Copy that sentence exactly as it appears — do not paraphrase,
+shorten, or join two sentences together. If you cannot find a sentence that
+states the condition, do not report it.
+
+Reply with only this JSON object and nothing else:
+
+{{"blockers": [{{"type": "<id from the list above>", "evidence": "<exact sentence from the posting>"}}]}}
+
+Use an empty list if nothing here disqualifies me.
+"""
+
+
+class Iteration3Single:
+    """The same evidence requirement, without decomposition.
+
+    The removal test. Iteration 3 scored F1 0.865 against iteration 1's 0.914 —
+    a 0.049 gap, below the 0.061 noise floor, so the two are indistinguishable
+    on detection while iteration 3 costs twice as much. That leaves the
+    question of whether decomposition is contributing anything at all, or
+    whether the evidence requirement is doing all the work.
+
+    One call, all fourteen conditions, quote required. If this matches
+    iteration 3's evidence coverage at iteration 1's F1 and half the cost,
+    decomposition is removed.
+    """
+
+    name = "iter3s"
+    description = "single pass + verbatim evidence (decomposition removed)"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        prompt = ITER3S_PROMPT.format(
+            profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+            posting=posting.strip(),
+            definitions=blocker_definitions(taxonomy),
+        )
+        response = traj.call("ask", BASELINE_SYSTEM, prompt)
+
+        allowed = {b["id"] for b in taxonomy["blockers"]}
+        found = [c for c in parse_claims_json(response.text) if c.type in allowed]
+        return Prediction(verdict="SKIP" if found else "APPLY", blockers=found)
+
+
 VARIANTS: dict[str, Variant] = {
     "iter1": Iteration1(),
     "iter2": Iteration2(),
+    "iter3": Iteration3(),
+    "iter3s": Iteration3Single(),
 }

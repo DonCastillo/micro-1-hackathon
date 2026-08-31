@@ -1,0 +1,123 @@
+{
+  "label": "Iteration 3 (evidence)",
+  "meta": {
+    "system": "iter3",
+    "description": "decomposition + verbatim evidence required for every claim",
+    "model": "claude-sonnet-5",
+    "effort": "medium",
+    "usage": {
+      "calls": 96,
+      "input_tokens": 105428,
+      "output_tokens": 3759,
+      "cache_read_input_tokens": 0,
+      "cache_creation_input_tokens": 0,
+      "cost_usd": 0.248446
+    },
+    "trajectories": "/Users/doncastillo/Code/hackathon/micro1/runs/20260831-070031_iter3"
+  },
+  "metrics": {
+    "tp": 16,
+    "fp": 3,
+    "fn": 2,
+    "precision": 0.8421052631578947,
+    "recall": 0.8888888888888888,
+    "f1": 0.8648648648648649,
+    "clean_false_alarm_rate": 0.0,
+    "decision_accuracy": 1.0,
+    "evidence_found_rate": 1.0,
+    "evidence_correct_rate": 1.0,
+    "hallucination_rate": 0.0,
+    "missing_evidence_rate": 0.0,
+    "parse_failure_rate": 0.0,
+    "n_postings": 24,
+    "n_clean": 8,
+    "n_claims": 19,
+    "n_clean_flagged": 0,
+    "recall_by_type": {
+      "citizenship_required": [
+        3,
+        3
+      ],
+      "compensation_floor": [
+        1,
+        1
+      ],
+      "employment_type": [
+        2,
+        2
+      ],
+      "onsite_location": [
+        1,
+        2
+      ],
+      "professional_licensure": [
+        1,
+        2
+      ],
+      "relocation_required": [
+        2,
+        2
+      ],
+      "security_clearance": [
+        1,
+        1
+      ],
+      "shift_oncall": [
+        1,
+        1
+      ],
+      "travel_percentage": [
+        1,
+        1
+      ],
+      "work_authorization": [
+        2,
+        2
+      ],
+      "years_of_experience": [
+        1,
+        1
+      ]
+    },
+    "recall_by_style": {
+      "explicit": [
+        5,
+        5
+      ],
+      "footer": [
+        3,
+        4
+      ],
+      "indirect": [
+        5,
+        5
+      ],
+      "scoped_negation": [
+        2,
+        2
+      ],
+      "title_body_conflict": [
+        1,
+        2
+      ]
+    },
+    "recall_by_bucket": {
+      "contradiction": [
+        3,
+        4
+      ],
+      "injected": [
+        10,
+        10
+      ],
+      "multi": [
+        3,
+        4
+      ]
+    },
+    "cost_usd": 0.248446,
+    "input_tokens": 105428,
+    "output_tokens": 3759,
+    "cost_per_task": 0.010351916666666667
+  }
+}
