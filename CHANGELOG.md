@@ -531,3 +531,30 @@ coverage, decision accuracy and cost. All the remaining variation is in precisio
 
 **It costs less than the baseline.** Requiring evidence makes the model answer in JSON
 rather than prose, and the shorter output more than pays for the longer prompt.
+
+### Human time per task
+
+Measured once by hand, per `EVAL.md` §7.
+
+| Condition | Postings | Total | Per posting |
+|---|---|---|---|
+| Manual triage | `jd_01`–`jd_10` | 16 min 09 s | **96.9 s** |
+| Reviewing the tool's output | `jd_11`–`jd_20` | 2 min 20 s | **14.0 s** |
+
+**82.9 seconds saved per posting — an 85.6% reduction.** At twenty postings a week that is
+32 minutes of eligibility checking reduced to under five.
+
+The reviewer's note matters as much as the stopwatch: *no verdict prompted a check of the
+underlying posting.* Time is only saved if the output is trusted enough to act on — a tool
+that halves reading time but leaves you re-reading the posting anyway has saved nothing, and
+that is the failure this measurement was designed to expose.
+
+**Stated limitations.** n=1, self-timed, by someone already familiar with the corpus, and
+the assisted pass followed the manual one so some speed is practice rather than tooling. The
+direction is solid; the magnitude is indicative. A controlled version would use naive
+reviewers, counterbalanced order, and unseen postings.
+
+**What the saving is really worth.** Ninety seconds a posting is not a large number in
+absolute terms. What makes it worth saving is that roughly two thirds of it was being spent
+on postings the applicant was never eligible for — the value is not the minutes, it is that
+the remaining minutes go to applications that can succeed.

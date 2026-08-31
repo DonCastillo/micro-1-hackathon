@@ -40,7 +40,7 @@ Nothing here calls a model. This phase exists so the evaluation can't drift to f
 
 - [x] **1.2 — `data/profile/candidate.yaml`.** Synthetic but realistic: `work_auth`, `citizenship`, `location`, `willing_to_relocate`, `timezone`, `years_experience`, `degree`, `certifications`, `clearance`, `comp_floor`, `employment_types`, `max_travel_pct`.
 
-- [ ] **1.3 — `EVAL.md`.** Freeze the metrics before any agent exists: primary F1 (recall + false-alarm rate), decision accuracy, evidence accuracy, evidence-hallucination rate, human time, cost. State the target explicitly: *every hard blocker caught, ≤1 clean posting flagged, correct evidence span on every reported blocker.*
+- [X] **1.3 — `EVAL.md`.** Freeze the metrics before any agent exists: primary F1 (recall + false-alarm rate), decision accuracy, evidence accuracy, evidence-hallucination rate, human time, cost. State the target explicitly: *every hard blocker caught, ≤1 clean posting flagged, correct evidence span on every reported blocker.*
 
 **Done when:** another person could read `EVAL.md` and score a run identically to you, with no judgment calls left open.
 
@@ -48,21 +48,21 @@ Nothing here calls a model. This phase exists so the evaluation can't drift to f
 
 ## Phase 2 — Injector and corpus (3h)
 
-- [ ] **2.1 — Write 12 clean base postings** (`src/injector/bases/`). Realistic structure: title, about-us, responsibilities, requirements, nice-to-haves, benefits, EEO footer. Vary length and tone. These must contain **zero** blockers — verify by hand, since every false alarm later is scored against them.
+- [x] **2.1 — Write 12 clean base postings** (`src/injector/bases/`). Realistic structure: title, about-us, responsibilities, requirements, nice-to-haves, benefits, EEO footer. Vary length and tone. These must contain **zero** blockers — verify by hand, since every false alarm later is scored against them.
 
-- [ ] **2.2 — `src/injector/inject.py`.** One function per blocker type, taking `(posting, phrasing_style)` and returning `(modified_posting, char_span)`. Insertion points vary by style: `explicit` → requirements section; `indirect` → mid-body; `footer` → benefits/legal boilerplate.
+- [x] **2.2 — `src/injector/inject.py`.** One function per blocker type, taking `(posting, phrasing_style)` and returning `(modified_posting, char_span)`. Insertion points vary by style: `explicit` → requirements section; `indirect` → mid-body; `footer` → benefits/legal boilerplate.
 
-- [ ] **2.3 — Distractor injection.** Inserts `preferred`-flavored text that resembles a blocker but isn't. Every clean posting gets 1–2.
+- [x] **2.3 — Distractor injection.** Inserts `preferred`-flavored text that resembles a blocker but isn't. Every clean posting gets 1–2.
 
-- [ ] **2.4 — Contradiction builder.** The hard cases: title says "Remote", body says "3 days onsite in Austin". Also scoped negation — "sponsorship available for some roles, but not this one."
+- [x] **2.4 — Contradiction builder.** The hard cases: title says "Remote", body says "3 days onsite in Austin". Also scoped negation — "sponsorship available for some roles, but not this one."
 
-- [ ] **2.5 — `src/injector/generate.py`.** Seeded. Emits the 24-posting corpus per `plan.md` §4 plus `labels.yaml`.
+- [x] **2.5 — `src/injector/generate.py`.** Seeded. Emits the 24-posting corpus per `plan.md` §4 plus `labels.yaml`.
 
 ```bash
 python -m src.injector.generate --seed 42 --out data/corpus
 ```
 
-- [ ] **2.6 — Verify determinism.** Generate twice into separate directories, diff them.
+- [x] **2.6 — Verify determinism.** Generate twice into separate directories, diff them.
 
 **Done when:** two runs at seed 42 are byte-identical, and you have spot-read 3 postings and agreed with their labels by eye.
 
@@ -72,9 +72,9 @@ python -m src.injector.generate --seed 42 --out data/corpus
 
 Built **before** the baseline, so both systems are scored by identical code.
 
-- [ ] **3.1 — Prediction schema.** Every system — baseline and agent alike — emits the same JSON: `verdict`, `blockers[]` with `type` + `evidence` (a quoted string), `caveats[]`.
+- [x] **3.1 — Prediction schema.** Every system — baseline and agent alike — emits the same JSON: `verdict`, `blockers[]` with `type` + `evidence` (a quoted string), `caveats[]`.
 
-- [ ] **3.2 — `src/eval/match.py`.** The fiddly part. **`EVAL.md` §3 is authoritative** — implement it exactly. In short:
+- [x] **3.2 — `src/eval/match.py`.** The fiddly part. **`EVAL.md` §3 is authoritative** — implement it exactly. In short:
   1. Normalize whitespace on both sides; substring search is case-insensitive.
   2. **Detection matches on `type` only, one-to-one.** Walk predictions in order; each matches the first not-yet-matched gold blocker of the same type on that posting. Unmatched prediction → FP. Unmatched gold → FN.
   3. **Evidence is scored separately, over the TPs.** Locate the quote: not found → hallucinated; found → correct if its span overlaps the gold span.
@@ -82,9 +82,9 @@ Built **before** the baseline, so both systems are scored by identical code.
 
   Keep detection and evidence as separate metrics. Collapsing them hides which one an iteration improved — and iteration 3 is specifically expected to move evidence while leaving detection flat.
 
-- [ ] **3.3 — `src/eval/metrics.py`.** Per-posting TP/FP/FN → corpus-level recall, false-alarm rate, F1, decision accuracy, evidence accuracy, hallucination rate. Emits a markdown table for direct paste into the changelog.
+- [x] **3.3 — `src/eval/metrics.py`.** Per-posting TP/FP/FN → corpus-level recall, false-alarm rate, F1, decision accuracy, evidence accuracy, hallucination rate. Emits a markdown table for direct paste into the changelog.
 
-- [ ] **3.4 — Sanity-test the scorer.** Feed it three hand-written prediction files: a perfect one (expect F1 = 1.0), an empty one (expect recall 0, false alarms 0), and a flag-everything one (expect recall 1.0, false-alarm rate near 1.0). **A scorer you haven't tested will silently invalidate every number downstream.**
+- [x] **3.4 — Sanity-test the scorer.** Feed it three hand-written prediction files: a perfect one (expect F1 = 1.0), an empty one (expect recall 0, false alarms 0), and a flag-everything one (expect recall 1.0, false-alarm rate near 1.0). **A scorer you haven't tested will silently invalidate every number downstream.**
 
 **Done when:** all three sanity predictions produce exactly the expected metrics.
 
@@ -92,17 +92,17 @@ Built **before** the baseline, so both systems are scored by identical code.
 
 ## Phase 4 — Baseline (1h)
 
-- [ ] **4.1 — `src/baseline/run.py`.** One prompt: posting + profile → "Should I apply?" No tools, no taxonomy, no evidence requirement. A thin parse layer maps its freeform answer into the shared schema — do not improve the baseline's *reasoning* to make parsing easier; that would inflate it and make the comparison unfair.
+- [X] **4.1 — `src/baseline/run.py`.** One prompt: posting + profile → "Should I apply?" No tools, no taxonomy, no evidence requirement. A thin parse layer maps its freeform answer into the shared schema — do not improve the baseline's *reasoning* to make parsing easier; that would inflate it and make the comparison unfair.
 
-- [ ] **4.2 — Trajectory logging.** Write every run to `runs/<timestamp>/` — prompts, raw responses, token counts, cost, wall time. Build this now, in the baseline, so it's inherited by everything after and the trajectories deliverable costs nothing at the end.
+- [x] **4.2 — Trajectory logging.** Write every run to `runs/<timestamp>/` — prompts, raw responses, token counts, cost, wall time. Build this now, in the baseline, so it's inherited by everything after and the trajectories deliverable costs nothing at the end.
 
-- [ ] **4.3 — Run and record.**
+- [x] **4.3 — Run and record.**
 
 ```bash
 python -m src.eval.run --system baseline --corpus data/corpus --out results/baseline
 ```
 
-- [ ] **4.4 — Write the baseline changelog entry immediately**, with its numbers, into `CHANGELOG.md`.
+- [X] **4.4 — Write the baseline changelog entry immediately**, with its numbers, into `CHANGELOG.md`.
 
 **Done when:** `results/baseline/metrics.md` exists and the changelog's first row is filled in with real values.
 
@@ -114,15 +114,15 @@ python -m src.eval.run --system baseline --corpus data/corpus --out results/base
 
 Same loop every time: **implement → run → record → decide.** Write the changelog entry before starting the next iteration; retroactive changelogs read as fiction.
 
-- [ ] **5.1 — Iteration 1: structured output + taxonomy in context.** Give the model the blocker taxonomy and require the JSON schema. *Hypothesis: some misses are vagueness — naming the categories gives it targets.*
+- [X] **5.1 — Iteration 1: structured output + taxonomy in context.** Give the model the blocker taxonomy and require the JSON schema. *Hypothesis: some misses are vagueness — naming the categories gives it targets.*
 
-- [ ] **5.2 — Iteration 2: per-category decomposition.** One independent check per taxonomy group (legal / logistics / credentials / terms), results merged. *Hypothesis: a single pass anchors on the first blocker and stops looking.* Watch the multi-blocker stress cases here specifically.
+- [x] **5.2 — Iteration 2: per-category decomposition.** One independent check per taxonomy group (legal / logistics / credentials / terms), results merged. *Hypothesis: a single pass anchors on the first blocker and stops looking.* Watch the multi-blocker stress cases here specifically.
 
-- [ ] **5.3 — Iteration 3: evidence spans + verification pass.** Every claim must quote the posting; a second pass verifies each quote exists and actually supports the claimed blocker, and can only **reject** claims, never add them. *Hypothesis: this is the big false-alarm cut.* Expect the largest single gain here.
+- [X] **5.3 — Iteration 3: evidence spans + verification pass.** Every claim must quote the posting; a second pass verifies each quote exists and actually supports the claimed blocker, and can only **reject** claims, never add them. *Hypothesis: this is the big false-alarm cut.* Expect the largest single gain here.
 
-- [ ] **5.4 — Iteration 4: contradiction resolution.** Explicit reconciliation across title / body / footer with a stated precedence rule. *Hypothesis: targets the 4 contradictory cases, which earlier iterations likely still miss.*
+- [x] **5.4 — Iteration 4: contradiction resolution.** Explicit reconciliation across title / body / footer with a stated precedence rule. *Hypothesis: targets the 4 contradictory cases, which earlier iterations likely still miss.*
 
-- [ ] **5.5 — The removal candidate: two-agent reviewer + challenger debate.** Run it honestly. Prediction: added cost and latency, no gain over 5.3's verification pass. If it loses, it earns a changelog entry on what it taught. If it wins, it stays — the brief wants a removed experiment, but a *fabricated* one is worse than none.
+- [x] **5.5 — The removal candidate: two-agent reviewer + challenger debate.** Run it honestly. Prediction: added cost and latency, no gain over 5.3's verification pass. If it loses, it earns a changelog entry on what it taught. If it wins, it stays — the brief wants a removed experiment, but a *fabricated* one is worse than none.
 
 For each: `python -m src.eval.run --system agent --variant iterN --out results/iterN`
 
