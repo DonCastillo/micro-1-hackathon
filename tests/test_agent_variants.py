@@ -127,3 +127,92 @@ def test_every_variant_declares_itself():
     for name, variant in VARIANTS.items():
         assert variant.name == name
         assert variant.description
+
+
+# ─── iteration 2: decomposition ───────────────────────────────────────────
+
+def test_iteration2_asks_one_question_per_group():
+    """Four narrower questions, not four copies of the same one."""
+    from src.trajectory import Trajectory
+
+    calls = []
+
+    class _Capture(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            calls.append((name, user))
+
+            class _R:
+                text = "BLOCKERS: NONE"
+
+            return _R()
+
+    VARIANTS["iter2"].predict("# Role\nRemote (United States)\n", PROFILE, TAXONOMY,
+                              _Capture(posting_id="jd_test"))
+    names = [n for n, _ in calls]
+    assert names == [f"check_{g}" for g in TAXONOMY["groups"]]
+    assert len(set(u for _, u in calls)) == 4, "each group must get a different prompt"
+
+
+def test_each_group_check_sees_only_its_own_conditions():
+    """Otherwise it is four identical passes, not a decomposition."""
+    from src.trajectory import Trajectory
+
+    prompts = {}
+
+    class _Capture(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            prompts[name] = user
+
+            class _R:
+                text = "BLOCKERS: NONE"
+
+            return _R()
+
+    VARIANTS["iter2"].predict("# Role\n", PROFILE, TAXONOMY, _Capture(posting_id="jd_test"))
+    for group in TAXONOMY["groups"]:
+        text = prompts[f"check_{group}"]
+        # Match the rendered definition line, not a bare id: the profile block
+        # legitimately contains `employment_types`, which has the id
+        # `employment_type` inside it.
+        for blocker in TAXONOMY["blockers"]:
+            line = f"- {blocker['id']} ({blocker['group']}):"
+            if blocker["group"] == group:
+                assert line in text, f"{group} check is missing {blocker['id']}"
+            else:
+                assert line not in text, f"{group} check leaks {blocker['id']}"
+
+
+def test_iteration2_merges_and_deduplicates():
+    from src.trajectory import Trajectory
+
+    replies = iter([
+        "BLOCKERS: work_authorization",
+        "BLOCKERS: onsite_location",
+        "BLOCKERS: NONE",
+        "BLOCKERS: NONE",
+    ])
+
+    class _Fake(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            class _R:
+                text = next(replies)
+
+            return _R()
+
+    p = VARIANTS["iter2"].predict("# Role\n", PROFILE, TAXONOMY, _Fake(posting_id="jd_test"))
+    assert p.verdict == "SKIP"
+    assert sorted(c.type for c in p.blockers) == ["onsite_location", "work_authorization"]
+
+
+def test_iteration2_returns_apply_when_no_group_finds_anything():
+    from src.trajectory import Trajectory
+
+    class _Fake(Trajectory):
+        def call(self, name, system, user, **kw):  # type: ignore[override]
+            class _R:
+                text = "BLOCKERS: NONE"
+
+            return _R()
+
+    p = VARIANTS["iter2"].predict("# Role\n", PROFILE, TAXONOMY, _Fake(posting_id="jd_test"))
+    assert p.verdict == "APPLY" and p.blockers == []

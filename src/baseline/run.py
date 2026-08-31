@@ -112,10 +112,19 @@ def parse_baseline_output(text: str, known_types: list[str]) -> Prediction:
     else:
         verdict = _verdict_from_prose(text)
 
-    # Only the declared BLOCKERS line counts as a claim. A label discussed in
-    # the body ("worth verifying their sponsorship policy") is commentary, not
-    # a claim, and counting it would invent findings the model never made.
-    source = blockers_match.group(1) if blockers_match else ""
+    return Prediction(verdict=verdict, blockers=extract_declared_blockers(text, known_types))
+
+
+def extract_declared_blockers(text: str, known_types: list[str]) -> list[Claim]:
+    """Blocker ids from the declared BLOCKERS line, and nowhere else.
+
+    A label discussed in the body ("worth verifying their sponsorship policy")
+    is commentary, not a claim. Counting it invented findings the model never
+    made — measured on real output, that misread two of the first three
+    responses.
+    """
+    match = _BLOCKERS_LINE.search(text)
+    source = match.group(1) if match else ""
     if re.search(r"\bnone\b", source, re.I):
         source = ""
 
@@ -124,8 +133,7 @@ def parse_baseline_output(text: str, known_types: list[str]) -> Prediction:
         pattern = re.escape(blocker_id).replace("_", r"[\s_-]")
         if re.search(rf"\b{pattern}\b", source, re.I):
             named.append(Claim(blocker_id, ""))
-
-    return Prediction(verdict=verdict, blockers=named)
+    return named
 
 
 def _verdict_from_prose(text: str) -> str:

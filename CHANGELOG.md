@@ -10,6 +10,7 @@ Entries are written when the experiment runs, not reconstructed afterwards.
 |---|---|---|---|
 | **Baseline** | One direct prompt, one pass, no help | **F1 0.789** (0.789–0.850 over 3 runs) | Verdicts already perfect; the failure is *attribution*, not detection |
 | **Iteration 1** | Taxonomy definitions instead of bare ids — the failures looked like a vocabulary problem | **F1 0.914** (+0.125) · precision 0.750 → 0.941 | **Kept.** Confusable-pair errors eliminated; remaining misses are all on multi-blocker postings |
+| **Iteration 2** | Four independent per-group checks, merged — iteration 1 found one blocker and stopped | **F1 0.850** (−0.064) · recall 0.889 → 0.944, precision 0.941 → 0.773 | **Not kept on its own.** Hypothesis confirmed *and* the change lost: narrowing the question removed the cross-group competition that suppressed marginal claims |
 
 ---
 
@@ -190,3 +191,69 @@ the results should recover the second blocker on multi-blocker postings. Predict
 recall rises on the `multi` bucket specifically, precision roughly flat. `professional_licensure`
 in its footer phrasing has now been missed in all four runs, and remains a suspected corpus
 defect rather than a system failure — see the step 2.6 audit note.
+
+
+---
+
+## Iteration 2 — per-group decomposition
+
+**What and why.** Iteration 1's two remaining misses were both multi-blocker postings where
+the model named one blocker and stopped. So: four independent calls per posting, one per
+taxonomy group (legal / logistics / credentials / terms), each shown only its own
+conditions, results merged and deduplicated. Nothing else changed.
+
+**Predicted before running:** recall rises on the `multi` bucket specifically; precision
+flat or slightly down, since four chances to claim something is four chances to claim
+something wrong; cost roughly doubles.
+
+**Evidence.** One run, $0.30.
+
+| Metric | Iteration 1 | Iteration 2 | Change |
+|---|---|---|---|
+| **Detection F1** | **0.914** | **0.850** | **−0.064** |
+| Recall | 0.889 | 0.944 | +0.056 |
+| Precision | 0.941 | 0.773 | −0.168 |
+| False positives | 1 | 5 | +4 |
+| Cost per task | $0.0050 | $0.0124 | ×2.5 |
+
+**The hypothesis was confirmed. The change still lost.** `jd_04` is exactly the case it was
+built for — iteration 1 found `citizenship_required` and stopped; iteration 2 recovered
+`employment_type` as well. Recall rose precisely where predicted.
+
+But precision fell nearly three times as far as recall rose, and F1 went backwards by 0.064
+— marginally beyond the 0.061 noise floor, so a real regression rather than noise, though
+close enough that the margin is stated rather than glossed.
+
+**Why it lost, which is the more useful finding.** Three of the four new false positives are
+*within-group neighbours* of the correct answer:
+
+```
+jd_03  gold citizenship_required   →  also claimed work_authorization    (both legal)
+jd_11  gold onsite_location        →  also claimed relocation_required   (both logistics)
+jd_06  gold relocation_required    →  also claimed onsite_location       (both logistics)
+```
+
+Asking "check this posting for **legal** disqualifiers only" primes the model to find legal
+disqualifiers. In a single pass the categories compete: a marginal `work_authorization`
+reading loses to a strong `citizenship_required` one. Isolate the group and that competition
+disappears, so the marginal claim survives.
+
+**Decomposition traded cross-category suppression for within-category recall.** The
+suppression was doing more work than the extra recall was worth. That is not something the
+totals show — F1 alone says "worse" — it took the per-posting error breakdown to see that
+the losses and the gains had different mechanisms.
+
+**Decision — not kept on its own, carried forward as an input to iteration 3.** The four new
+false positives are all claims the model cannot support with a quote: there is no sentence
+in `jd_03` denying sponsorship, because the blocker there is ITAR citizenship. That is
+precisely what a verification pass is for. Iteration 3 therefore tests decomposition *plus*
+verification against iteration 1 directly:
+
+- if it beats iteration 1, decomposition was worth keeping as a recall source that
+  verification cleans up;
+- if it does not, decomposition is removed and iteration 1's single pass stands.
+
+Either outcome is reportable, and the removal case is written up rather than deleted.
+
+**Cost note.** 2.5× the cost of iteration 1 for a worse score. If iteration 3 does not
+recover the precision, this is a straightforward removal on both axes.
