@@ -1,0 +1,229 @@
+{
+  "system": "iter1-nofield",
+  "description": "ablation: definitions without the deciding profile field",
+  "model": "claude-sonnet-5",
+  "effort": "medium",
+  "usage": {
+    "calls": 24,
+    "input_tokens": 30257,
+    "output_tokens": 4432,
+    "cache_read_input_tokens": 0,
+    "cache_creation_input_tokens": 0,
+    "cost_usd": 0.104834
+  },
+  "trajectories": "/Users/doncastillo/Code/hackathon/micro1/runs/20260831-093005_iter1-nofield",
+  "predictions": {
+    "jd_01": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_02": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "years_of_experience",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_03": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_04": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        },
+        {
+          "type": "employment_type",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_05": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_06": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_07": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "professional_licensure",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_08": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_09": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "employment_type",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_10": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_11": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_12": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_13": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_14": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "onsite_location",
+          "evidence": ""
+        },
+        {
+          "type": "relocation_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_15": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "compensation_floor",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_16": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "citizenship_required",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_17": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_18": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "security_clearance",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_19": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "shift_oncall",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_20": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_21": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "travel_percentage",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_22": {
+      "verdict": "APPLY",
+      "blockers": [],
+      "caveats": []
+    },
+    "jd_23": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    },
+    "jd_24": {
+      "verdict": "SKIP",
+      "blockers": [
+        {
+          "type": "work_authorization",
+          "evidence": ""
+        }
+      ],
+      "caveats": []
+    }
+  }
+}

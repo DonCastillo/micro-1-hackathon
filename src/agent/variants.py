@@ -34,6 +34,18 @@ class Variant(Protocol):
     ) -> Prediction: ...
 
 
+def blocker_definitions_without_field(taxonomy: dict[str, Any]) -> str:
+    """Descriptions only, with the deciding profile field withheld.
+
+    The ablation behind the largest-contributor claim (step 6.5). Iteration 1
+    changed two things at once: it added a description *and* named the profile
+    field. This isolates which of the two did the work.
+    """
+    return "\n".join(
+        f"- {b['id']} ({b['group']}): {b['description']}" for b in taxonomy["blockers"]
+    )
+
+
 def blocker_definitions(taxonomy: dict[str, Any]) -> str:
     """What each id means and which profile field decides it.
 
@@ -576,8 +588,38 @@ class Final:
         return Prediction(verdict="SKIP" if kept else "APPLY", blockers=kept)
 
 
+class Iteration1NoField:
+    """Iteration 1 with the deciding profile field removed from each definition.
+
+    Everything else identical: same prompt, same output format, one call. If F1
+    falls back toward the baseline, the field mapping was the contributor. If it
+    holds near 0.914, the descriptions alone were enough and the field naming
+    was decoration.
+    """
+
+    name = "iter1-nofield"
+    description = "ablation: definitions without the deciding profile field"
+
+    def predict(
+        self, posting: str, profile: dict[str, Any], taxonomy: dict[str, Any], traj: Trajectory
+    ) -> Prediction:
+        prompt = ITER1_PROMPT.format(
+            profile=yaml.safe_dump(profile, sort_keys=False).strip(),
+            posting=posting.strip(),
+            definitions=blocker_definitions_without_field(taxonomy),
+        )
+        response = traj.call("ask", BASELINE_SYSTEM, prompt)
+        ids = [b["id"] for b in taxonomy["blockers"]]
+        try:
+            return parse_baseline_output(response.text, ids)
+        except Exception as exc:  # noqa: BLE001
+            traj.note("parse_failure", str(exc))
+            return Prediction.unparseable(str(exc))
+
+
 VARIANTS: dict[str, Variant] = {
     "iter1": Iteration1(),
+    "iter1-nofield": Iteration1NoField(),
     "iter2": Iteration2(),
     "iter3": Iteration3(),
     "iter3s": Iteration3Single(),

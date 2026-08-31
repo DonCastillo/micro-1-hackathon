@@ -127,7 +127,11 @@ something else.
 false positives was a confusion between two semantic neighbours, so the hypothesis was that
 this is a *vocabulary* problem: the model cannot separate ITAR citizenship from visa
 sponsorship when it has only been shown the labels' names. Iteration 1 adds each blocker's
-description and — the load-bearing part — **which profile field decides it**:
+description and ~~— the load-bearing part —~~ **which profile field decides it**:
+
+> **Correction (step 6.5).** "The load-bearing part" was wrong. An ablation run later
+> removed the profile field and scored *identically*. The descriptions alone did the work.
+> The claim is struck rather than deleted; see **Largest contributor** below.
 
 ```
 - work_authorization (legal): Role does not offer visa sponsorship.
@@ -594,3 +598,67 @@ takes about 9 minutes.
 absolute terms. What makes it worth saving is that roughly two thirds of it was being spent
 on postings the applicant was never eligible for — the value is not the minutes, it is that
 the remaining minutes go to applications that can succeed.
+
+
+---
+
+## Largest contributor — measured, not assumed
+
+The brief asks which change contributed most. Iteration 1 accounts for almost the entire
+F1 gain, and an ablation was run to find out *which half* of it mattered.
+
+| Step | F1 | Δ |
+|---|---|---|
+| Baseline | 0.789 | — |
+| **+ taxonomy definitions** (iteration 1) | 0.914 | **+0.125** |
+| + verbatim evidence, decomposition removed | 0.895 | −0.019 |
+| + mechanical grounding check | 0.919 | +0.024 |
+
+**One change is worth 96% of the F1 improvement.** Everything after it was worth roughly
+nothing on the primary metric — and mattered for other reasons.
+
+### The ablation: which half of the definitions did it?
+
+Iteration 1 changed two things at once. Each definition gained a description *and* a
+statement of which profile field decides it. The changelog entry above asserted the field
+mapping was load-bearing. That was a guess, so it was tested: same prompt, same everything,
+with the profile field removed.
+
+| Variant | F1 | `work_authorization` false positives |
+|---|---|---|
+| Baseline (3 runs) | 0.789 | 3, 3, 3 |
+| Iteration 1 — description **+ profile field** | 0.914 | 0 |
+| **Ablation — description only** | **0.919** | **0** |
+
+**The profile field contributed nothing.** The descriptions alone eliminated the confusion
+that caused every baseline false positive. My stated mechanism was wrong, and the ablation
+is the only reason we know.
+
+What actually did the work is one line per label:
+
+```
+work_authorization   Role does not offer visa sponsorship.
+citizenship_required Employment restricted to U.S. citizens or
+                     ITAR-defined U.S. Persons.
+```
+
+The baseline had the *names* `work_authorization` and `citizenship_required` and treated an
+ITAR clause as a sponsorship problem nine times across three runs. Given one sentence
+distinguishing them, it never did so again.
+
+### So the answer has two parts
+
+**Largest contributor to accuracy: defining the labels.** +0.130 of a +0.155 total gain,
+from roughly 200 words of description that were already sitting in `data/taxonomy.yaml`
+as documentation. No extra calls, no extra tokens worth counting, no orchestration.
+
+**Largest contributor to usefulness: requiring a verbatim quote.** It moved F1 by nothing
+and changed the product entirely — evidence coverage 0% → 100%, and it is why the human
+review took 14 seconds per posting instead of 97 without anyone re-opening a posting to
+check. A `SKIP` with no citation is a claim you have to verify yourself; a `SKIP` quoting
+*"Relocation to Seattle, WA is a condition of employment"* is one you can act on.
+
+Measured on F1 alone, the evidence requirement looks like a wasted iteration. Measured on
+whether a person will trust the output enough to stop reading, it is the one that made the
+tool worth using. That gap between the primary metric and the actual goal is the most
+useful thing this project surfaced.
